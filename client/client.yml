@@ -1,0 +1,62 @@
+---
+- hosts: all
+  become: yes
+  vars_files:
+  - env.yml
+  tasks:
+  - name: copy client script
+    copy:
+      src: client.py
+      dest: /usr/local/bin/client.py
+      mode: 0755
+  - name: Install necessary packages
+    apt:
+      name: python3-pip, powerstat
+      state: latest
+      update_cache: yes
+  - name: Extract lynis into /opt/
+    unarchive:
+      src: lynis-3.0.3.tar.gz
+      dest: /opt/
+  - name: Change lynis file permissions
+    file:
+      path: /opt/lynis/lynis
+      mode: '0755'
+  - name: copy harden script
+    copy:
+      src: harden.py
+      dest: /usr/local/bin/harden.py
+      mode: 0755
+  - name: Run harden script
+    command: /usr/local/bin/harden.py
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+  - name: Install stress-ng
+    apt:
+      name: stress-ng
+      state: latest
+      update_cache: yes
+  - name: copy requirements.txt
+    copy:
+      src: requirements.txt
+      dest: /tmp/requirements.txt
+  - name: Install specified python requirements
+    pip:
+      executable: /usr/bin/pip3
+      requirements: /tmp/requirements.txt
+  - name: environment variables in /etc/environment
+    lineinfile:
+      dest: /etc/environment
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+    with_items:
+      - {regexp: '^DB_HOST=', line: 'DB_HOST={{ db_host }}'}
+      - {regexp: '^DB_PASS=', line: 'DB_PASS={{ db_pass }}'}
+      - {regexp: '^STAGE=', line: 'STAGE={{ stage }}'}
+  - name: Run client agent
+    command: /usr/local/bin/client.py -a
+    environment:
+      DB_HOST: "{{ db_host }}"
+      DB_PASS: "{{ db_pass }}"
+      STAGE: "{{ stage }}"
+...

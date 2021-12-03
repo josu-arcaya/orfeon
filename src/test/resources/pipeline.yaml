@@ -1,0 +1,62 @@
+version: "1.0"
+pipeline:
+  - model: unitConverter.pfa
+    args:
+      ufrom: "miles"
+      uto: "km"
+    resources:
+      cpus: "4"
+      memory: "8"
+    constraints:
+      node:
+        layer: "edge"
+    privacy:
+      location: "FR"
+      type: 1
+    queues:
+      input: "disk"
+      output: "edge2fog"
+  - model: randomForest.pfa
+    args:
+      arg1: 2
+      arg2: 3
+    resources:
+      cpus: "1"
+      gpus: "2"
+      memory: "16"
+      network: "10GbE"
+    privacy:
+      location: "FR"
+      type: 0
+    labels:
+      security: "high"
+      zone: "eu-west"
+  - model: naiveBayes.pfa
+    labels:
+      security: "low"
+      zone: "eu-west"
+    resources:
+      cpus: "4"
+      memory: "8"
+    privacy:
+      location: "US"
+      type: 0
+  - model: nearestNeighbors.pfa
+    resources:
+      cpus: "2"
+      memory: "2"
+    labels:
+      security: "low"
+      zone: "eu-west"
+    privacy:
+      location: "JP"
+      type: 0
+
+queues:
+  edge2fog:
+    format: "avro"
+  fog2cloud:
+    format: "json"
+  disk:
+    format: "text"
+    path: "/var/log/pgsql/logs/*.log"

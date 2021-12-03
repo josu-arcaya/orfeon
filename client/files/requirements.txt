@@ -1,0 +1,4 @@
+tensorflow==2.4.1
+ai-benchmark==0.1.2
+psycopg2-binary==2.8.6
+ipwhois==1.2.0
