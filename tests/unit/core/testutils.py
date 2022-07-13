@@ -6,7 +6,7 @@ from src.core.utils import Infrastructure, Pipeline
 class TestInfrastructure(unittest.TestCase):
 
     def test_load_infrastructure_1(self):
-        file_location = 'src/test/resources/infrastructure.csv'
+        file_location = 'tests/resources/infrastructure.csv'
         infra = Infrastructure(file_location).load()
         self.assertTrue( len(infra.index)>0 )
         self.assertEqual( infra.hostname[0], 'WKM0092')
@@ -15,7 +15,7 @@ class TestInfrastructure(unittest.TestCase):
 class TestPipeline(unittest.TestCase):
 
     def test_load_pipeline(self):
-        file_location = 'src/test/resources/pipeline.yaml'
+        file_location = 'tests/resources/pipeline.yaml'
         with open(file_location, 'r') as input_data_file:
             input_data = input_data_file.read()
         p = Pipeline(input_data).load()

@@ -12,8 +12,8 @@ from src.core.utils import Infrastructure, Pipeline, WriteObjectivesToFileObserv
 class TestConstraints(unittest.TestCase):
 
     def setUp(self):
-        file_infrastructure = 'src/test/resources/infrastructure.csv'
-        pipeline_location = 'src/test/resources/pipeline.yaml'
+        file_infrastructure = 'tests/resources/infrastructure.csv'
+        pipeline_location = 'tests/resources/pipeline.yaml'
         with open(pipeline_location, 'r') as input_data_file:
             input_pipeline = input_data_file.read()
         self.o = Optimizer(termination_criterion=StoppingByEvaluations(max_evaluations=10000),

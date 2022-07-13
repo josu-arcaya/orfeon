@@ -23,8 +23,8 @@ class TestFitness(unittest.TestCase):
 #        new_solution = solution_constructor()
 #        self.assertEqual(o.get_performance(new_solution), 10)
     def setUp(self):
-        file_infrastructure = 'src/test/resources/infrastructure.csv'
-        pipeline_location = 'src/test/resources/pipeline.yaml'
+        file_infrastructure = 'tests/resources/infrastructure.csv'
+        pipeline_location = 'tests/resources/pipeline.yaml'
         with open(pipeline_location, 'r') as input_data_file:
             input_pipeline = input_data_file.read()
         """
