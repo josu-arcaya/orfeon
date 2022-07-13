@@ -1,0 +1,72 @@
+pipeline:
+- model: m0
+  privacy:
+    location: ES
+    type: 0
+  resources:
+    cpus: 2
+    memory: 3
+- model: m1
+  privacy:
+    location: ES
+    type: 2
+  resources:
+    cpus: 4
+    memory: 15
+- model: m2
+  privacy:
+    location: IE
+    type: 1
+  resources:
+    cpus: 4
+    memory: 7
+- model: m3
+  privacy:
+    location: ES
+    type: 2
+  resources:
+    cpus: 1
+    memory: 13
+- model: m4
+  privacy:
+    location: US
+    type: 1
+  resources:
+    cpus: 7
+    memory: 1
+- model: m5
+  privacy:
+    location: US
+    type: 0
+  resources:
+    cpus: 3
+    memory: 8
+- model: m6
+  privacy:
+    location: IE
+    type: 0
+  resources:
+    cpus: 3
+    memory: 1
+- model: m7
+  privacy:
+    location: ES
+    type: 2
+  resources:
+    cpus: 6
+    memory: 1
+- model: m8
+  privacy:
+    location: US
+    type: 0
+  resources:
+    cpus: 2
+    memory: 14
+- model: m9
+  privacy:
+    location: ES
+    type: 1
+  resources:
+    cpus: 5
+    memory: 8
+version: '1.0'

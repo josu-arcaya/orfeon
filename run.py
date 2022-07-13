@@ -54,8 +54,8 @@ def generate_barchar(file_infrastructure):
 
 
 def generate_pareto(file_infrastructure):
-    file_pipeline = f"src/resources/pipeline_40.yml"
-    population_size = 1000
+    file_pipeline = f"src/resources/pipeline_10.yml"
+    population_size = 100
     with open(file_pipeline, "r") as input_data_file:
         input_pipeline = input_data_file.read()
     o = Optimizer(
@@ -124,7 +124,7 @@ def main():
         "--memory",
         type=str,
         default=None,
-        help="Indicate number of moels (e.g., 5, 10, 20, 40, 80)",
+        help="Indicate number of models (e.g., 5, 10, 20, 40, 80)",
         required=False,
     )
 
