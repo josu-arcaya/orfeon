@@ -82,8 +82,11 @@ class TestFitness(unittest.TestCase):
         self.assertEqual(consumption, sum([c[0] for c in self.infra.consumption]))
 
     def test_latency(self):
-        latency = Objectives().get_latency()
+        latency = Objectives().get_latency(self.pipe, self.infra, self.sol_zeros)
         self.assertEqual(latency, 0)
+
+        latency = Objectives().get_latency(self.pipe, self.infra, self.sol_ones)
+        #self.assertEqual(latency, 0)
 
     """
     def setUp(self):

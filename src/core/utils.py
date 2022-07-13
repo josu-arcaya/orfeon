@@ -111,8 +111,13 @@ class Objectives():
         x = np.ma.masked_array(x, mask=s==0)
         return np.nanmin(x,axis=1).sum()
 
-    def get_latency(self) -> int:
-        return 0
+    def get_latency(self, pipe: Pipeline, infra: Infrastructure, solution: BinarySolution) -> int:
+        s = np.asfarray(solution.variables, dtype=np.bool)
+        
+        base_latency = s*infra.latency.to_numpy()
+        #LOGGER.warning(base_latency)
+        #LOGGER.warning(sum(base_latency))
+        return base_latency.max(0).sum()
 
 
 class WriteObjectivesToFileObserver(Observer):
