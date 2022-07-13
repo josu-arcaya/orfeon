@@ -1,5 +1,5 @@
 jmetalpy==1.5.4
 nose2==0.9.1
 PyYAML==5.1.2
-pycountry_convert
-pycountry
+pycountry_convert==0.7.2
+pycountry==20.7.3
