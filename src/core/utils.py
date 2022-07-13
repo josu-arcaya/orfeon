@@ -111,6 +111,9 @@ class Objectives():
         x = np.ma.masked_array(x, mask=s==0)
         return np.nanmin(x,axis=1).sum()
 
+    def get_latency(self) -> int:
+        return 0
+
 
 class WriteObjectivesToFileObserver(Observer):
     

@@ -81,6 +81,10 @@ class TestFitness(unittest.TestCase):
         consumption = Objectives().get_consumption(self.pipe, self.infra, self.sol_zeros)
         self.assertEqual(consumption, sum([c[0] for c in self.infra.consumption]))
 
+    def test_latency(self):
+        latency = Objectives().get_latency()
+        self.assertEqual(latency, 0)
+
     """
     def setUp(self):
         infrastructure_location = 'src/test/resources/infrastructure.csv'
