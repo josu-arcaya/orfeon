@@ -55,8 +55,8 @@ class Pipeline(Parser):
 
     def load(self):
 
-        columns = ['cpus','memory', 'country', 'privacy_type', 'continent']
-        data = {columns[0]: [], columns[1]: [], columns[2]: [], columns[3]: [], columns[4]: []}
+        columns = ['cpus','memory', 'country', 'privacy_type', 'continent','link']
+        data = {columns[0]: [], columns[1]: [], columns[2]: [], columns[3]: [], columns[4]: [], columns[5]: []}
         for i in range(len(self.x.pipeline)):
             data[columns[0]].append(float(self.x.pipeline[i].resources.cpus))
             data[columns[1]].append(float(self.x.pipeline[i].resources.memory))
@@ -66,6 +66,7 @@ class Pipeline(Parser):
             data[columns[3]].append(int(self.x.pipeline[i].privacy.type))
             # get continent from alpha_2 country code
             data[columns[4]].append(continent_codes[pc.country_alpha2_to_continent_code(self.x.pipeline[i].privacy.location)])
+            data[columns[5]].append(int(self.x.pipeline[i].link))
         b = pd.DataFrame(data=data, columns=columns)
 
         return b
@@ -111,13 +112,24 @@ class Objectives():
         x = np.ma.masked_array(x, mask=s==0)
         return np.nanmin(x,axis=1).sum()
 
-    def get_latency(self, pipe: Pipeline, infra: Infrastructure, solution: BinarySolution) -> int:
+    def get_latency(self, ld: np.array, pipe: Pipeline, infra: Infrastructure, solution: BinarySolution) -> int:
         s = np.asfarray(solution.variables, dtype=np.bool)
         
-        base_latency = s*infra.latency.to_numpy()
-        #LOGGER.warning(base_latency)
-        #LOGGER.warning(sum(base_latency))
-        return base_latency.max(0).sum()
+        z = s*ld.transpose()
+
+        c = np.array(s[pipe.link[0]])
+        c = np.vstack([c, s[pipe.link[1]]])
+        c = np.vstack([c, s[pipe.link[2]]])
+        c = np.vstack([c, s[pipe.link[3]]])
+
+        c = np.array([c])
+
+        #print(z.shape)
+        #print(c.shape)
+
+        z*c.transpose()
+
+        return np.sum(z)
 
 
 class WriteObjectivesToFileObserver(Observer):

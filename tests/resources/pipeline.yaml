@@ -16,6 +16,7 @@ pipeline:
     queues:
       input: "disk"
       output: "edge2fog"
+    link: 2
   - model: randomForest.pfa
     args:
       arg1: 2
@@ -31,6 +32,7 @@ pipeline:
     labels:
       security: "high"
       zone: "eu-west"
+    link: 2
   - model: naiveBayes.pfa
     labels:
       security: "low"
@@ -41,6 +43,7 @@ pipeline:
     privacy:
       location: "US"
       type: 0
+    link: 3
   - model: nearestNeighbors.pfa
     resources:
       cpus: "2"
@@ -51,6 +54,7 @@ pipeline:
     privacy:
       location: "JP"
       type: 0
+    link: 1
 
 queues:
   edge2fog:

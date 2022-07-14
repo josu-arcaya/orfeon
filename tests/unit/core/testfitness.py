@@ -1,5 +1,6 @@
 import unittest
-#from unittest.mock import patch
+
+# from unittest.mock import patch
 
 import logging
 import numpy as np
@@ -9,23 +10,24 @@ from src.core.optimizer import TravelingModel, Optimizer
 from jmetal.core.solution import BinarySolution
 from src.core.utils import Infrastructure, Pipeline, Objectives
 
+
 class TestFitness(unittest.TestCase):
 
-#    @patch("jmetal.core.problem.BinarySolution")
-#    def test_consumption_basic(self, solution_constructor):
-#        o = TravelingModel(100,100)
-#        new_solution = solution_constructor()
-#        self.assertEqual(o.get_consumption(new_solution), 5)
+    #    @patch("jmetal.core.problem.BinarySolution")
+    #    def test_consumption_basic(self, solution_constructor):
+    #        o = TravelingModel(100,100)
+    #        new_solution = solution_constructor()
+    #        self.assertEqual(o.get_consumption(new_solution), 5)
 
-#    @patch("jmetal.core.problem.BinarySolution")
-#    def test_performance_basic(self, solution_constructor):
-#        o = TravelingModel(100,100)
-#        new_solution = solution_constructor()
-#        self.assertEqual(o.get_performance(new_solution), 10)
+    #    @patch("jmetal.core.problem.BinarySolution")
+    #    def test_performance_basic(self, solution_constructor):
+    #        o = TravelingModel(100,100)
+    #        new_solution = solution_constructor()
+    #        self.assertEqual(o.get_performance(new_solution), 10)
     def setUp(self):
-        file_infrastructure = 'tests/resources/infrastructure.csv'
-        pipeline_location = 'tests/resources/pipeline.yaml'
-        with open(pipeline_location, 'r') as input_data_file:
+        file_infrastructure = "tests/resources/infrastructure.csv"
+        pipeline_location = "tests/resources/pipeline.yaml"
+        with open(pipeline_location, "r") as input_data_file:
             input_pipeline = input_data_file.read()
         """
         self.o = Optimizer(max_evaluations=2000, file_infrastructure=file_infrastructure, input_pipeline=input_pipeline, interactive_plot = False)
@@ -37,34 +39,35 @@ class TestFitness(unittest.TestCase):
         # load infrastructure
         self.infra = Infrastructure(file_infrastructure).load()
 
-        self.problem = TravelingModel(file_infrastructure,
-                                      input_pipeline)
+        self.problem = TravelingModel(file_infrastructure, input_pipeline)
 
         # number of models
-        #number_of_models = self.p.shape[1]
+        # number_of_models = self.p.shape[1]
         number_of_models = self.pipe.shape[0]
         # number of devices
         number_of_devices = len(self.infra.index)
 
         # all ones solution
-        self.sol_ones = BinarySolution(number_of_variables=number_of_models,
-                                       number_of_objectives=1)
+        self.sol_ones = BinarySolution(
+            number_of_variables=number_of_models, number_of_objectives=1
+        )
         for i in range(len(self.sol_ones.variables)):
-            self.sol_ones.variables[i] = \
-                [True for _ in range(number_of_devices)]
+            self.sol_ones.variables[i] = [True for _ in range(number_of_devices)]
 
         # all zeros solution
-        self.sol_zeros = BinarySolution(number_of_variables=number_of_models,
-                                        number_of_objectives=1)
+        self.sol_zeros = BinarySolution(
+            number_of_variables=number_of_models, number_of_objectives=1
+        )
         for i in range(len(self.sol_zeros.variables)):
-            self.sol_zeros.variables[i] = \
-                [False for _ in range(number_of_devices)]
+            self.sol_zeros.variables[i] = [False for _ in range(number_of_devices)]
 
     def test_performance(self):
         performance = Objectives().get_performance(self.pipe, self.infra, self.sol_ones)
         self.assertEqual(performance, 8113.56)
 
-        performance = Objectives().get_performance(self.pipe, self.infra, self.sol_zeros)
+        performance = Objectives().get_performance(
+            self.pipe, self.infra, self.sol_zeros
+        )
         self.assertEqual(performance, 0)
 
     def test_resillience(self):
@@ -78,15 +81,20 @@ class TestFitness(unittest.TestCase):
         consumption = Objectives().get_consumption(self.pipe, self.infra, self.sol_ones)
         self.assertEqual(consumption, 832.94)
 
-        consumption = Objectives().get_consumption(self.pipe, self.infra, self.sol_zeros)
+        consumption = Objectives().get_consumption(
+            self.pipe, self.infra, self.sol_zeros
+        )
         self.assertEqual(consumption, sum([c[0] for c in self.infra.consumption]))
 
     def test_latency(self):
-        latency = Objectives().get_latency(self.pipe, self.infra, self.sol_zeros)
+        ld = np.loadtxt("tests/resources/latencies", dtype=float)
+        ld = np.reshape(ld, (20, 1, 20))
+
+        latency = Objectives().get_latency(ld, self.pipe, self.infra, self.sol_zeros)
         self.assertEqual(latency, 0)
 
-        latency = Objectives().get_latency(self.pipe, self.infra, self.sol_ones)
-        #self.assertEqual(latency, 0)
+        latency = Objectives().get_latency(ld, self.pipe, self.infra, self.sol_ones)
+        self.assertEqual(int(latency), 8062)
 
     """
     def setUp(self):
@@ -192,5 +200,6 @@ class TestFitness(unittest.TestCase):
         self.o.plot()
     """
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
