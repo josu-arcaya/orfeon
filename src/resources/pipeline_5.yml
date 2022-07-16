@@ -1,37 +1,42 @@
 pipeline:
-- model: m0
+- link: 3
+  model: m0
   privacy:
     location: ES
     type: 0
   resources:
     cpus: 2
     memory: 3
-- model: m1
+- link: 3
+  model: m1
   privacy:
     location: ES
     type: 2
   resources:
-    cpus: 4
+    cpus: 7
     memory: 15
-- model: m2
+- link: 0
+  model: m2
   privacy:
     location: IE
     type: 1
   resources:
-    cpus: 4
+    cpus: 7
     memory: 7
-- model: m3
+- link: 0
+  model: m3
   privacy:
     location: ES
     type: 2
   resources:
-    cpus: 1
-    memory: 13
-- model: m4
-  privacy:
-    location: US
-    type: 1
-  resources:
     cpus: 7
-    memory: 1
+    memory: 13
+- link: 1
+  model: m4
+  privacy:
+    location: ES
+    type: 2
+  resources:
+    cpus: 6
+    memory: 15
 version: '1.0'

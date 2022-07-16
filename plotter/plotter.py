@@ -30,13 +30,15 @@ def pareto():
     #print(zs.max(), zs.min())
     ax.scatter(xs, ys, zs, marker='o')
 
-    ax.plot(xs, zs, 'r+', zdir='y', zs=30000)
-    ax.plot(ys, zs, 'g+', zdir='x', zs=2300)
-    ax.plot(xs, ys, 'k+', zdir='z', zs=18.0)
+    # plot the shadows
+    #ax.plot(xs, zs, 'r+', zdir='y', zs=30000)
+    #ax.plot(ys, zs, 'g+', zdir='x', zs=2300)
+    #ax.plot(xs, ys, 'k+', zdir='z', zs=18.0)
 
-    ax.set_xlim([2300, 2600])
-    ax.set_ylim([20000, 30000])
-    ax.set_zlim([18.0, 18.21])
+    # define limits
+    #ax.set_xlim([2300, 2600])
+    #ax.set_ylim([20000, 30000])
+    #ax.set_zlim([18.0, 18.21])
 
     ax.set_xlabel('Resilience')
     ax.set_ylabel('Performance')
@@ -47,6 +49,8 @@ def pareto():
     plt.savefig(f"/tmp/pareto.svg")
 
 def fitness(objective: int):
+    #plt.close("all")
+
     filename = '/tmp/fitnesses'
     if not os.path.isfile(filename):
         return
@@ -171,8 +175,8 @@ def memory():
 
 def main():
     pareto()
-    for o in range(3):
-        fitness(objective=o)
+    #for o in range(3):
+    #    fitness(objective=o)
     #times()
     #memory()
 

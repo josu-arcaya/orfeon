@@ -33,7 +33,8 @@ def generate_barchar(file_infrastructure):
         with open(file_pipeline, "r") as input_data_file:
             input_pipeline = input_data_file.read()
         pipe_time = []
-        for i in range(100):
+        # do it 100 times
+        for i in range(2):
             start_time = time.time()
             LOGGER.info(f"Executing iteration {i} of {file_pipeline}.")
             Optimizer(
