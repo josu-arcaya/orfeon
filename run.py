@@ -107,17 +107,17 @@ def main():
         required=False,
     )
     required.add_argument(
-        "-b",
-        "--barchar",
+        "-t",
+        "--times",
         action="store_true",
-        help="Generate barchar metrics",
+        help="Generate time metrics",
         required=False,
     )
     required.add_argument(
         "-f",
         "--fitnesses",
         action="store_true",
-        help="Generate barchar metrics",
+        help="Generate fitnesses metrics",
         required=False,
     )
     required.add_argument(
@@ -137,7 +137,7 @@ def main():
 
     file_infrastructure = "src/resources/infrastructure.csv"
 
-    if args.barchar:
+    if args.times:
         generate_barchar(file_infrastructure)
 
     if args.pareto:

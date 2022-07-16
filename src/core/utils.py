@@ -117,10 +117,14 @@ class Objectives():
         
         z = s*ld.transpose()
 
-        c = np.array(s[pipe.link[0]])
-        c = np.vstack([c, s[pipe.link[1]]])
-        c = np.vstack([c, s[pipe.link[2]]])
-        c = np.vstack([c, s[pipe.link[3]]])
+        c = np.empty(shape=s.shape)
+        for index, value in pipe.link.iteritems():
+            c[index] = s[value]
+
+        #c = np.array(s[pipe.link[0]])
+        #c = np.vstack([c, s[pipe.link[1]]])
+        #c = np.vstack([c, s[pipe.link[2]]])
+        #c = np.vstack([c, s[pipe.link[3]]])
 
         c = np.array([c])
 

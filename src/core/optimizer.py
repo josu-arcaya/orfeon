@@ -25,6 +25,8 @@ class TravelingModel(BinaryProblem):
 
         self.infra = Infrastructure(file_infrastructure).load()
         self.pipe = Pipeline(input_pipeline).load()
+        #self.ld = np.loadtxt("src/resources/latencies.csv", dtype=float)
+        #self.ld = np.reshape(self.ld, (50, 1, 50))
 
         # number of models
         #self.number_of_models = self.pipe.shape[1]
@@ -46,6 +48,7 @@ class TravelingModel(BinaryProblem):
         solution.objectives[0] = -1 * self.objectives.get_resilience(self.infra, solution)
         solution.objectives[1] = -1 * self.objectives.get_performance(self.pipe, self.infra, solution)
         solution.objectives[2] = self.objectives.get_consumption(self.pipe, self.infra, solution)
+        #solution.objectives[3] = -1 * self.objectives.get_latency(ld=self.ld, pipe=self.pipe, infra=self.infra, solution=solution)
 
         self.__evaluate_constraints(solution)
 
