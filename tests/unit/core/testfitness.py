@@ -26,6 +26,7 @@ class TestFitness(unittest.TestCase):
     #        self.assertEqual(o.get_performance(new_solution), 10)
     def setUp(self):
         file_infrastructure = "tests/resources/infrastructure.csv"
+        file_latencies = "tests/resources/latencies.csv"
         pipeline_location = "tests/resources/pipeline.yaml"
         with open(pipeline_location, "r") as input_data_file:
             input_pipeline = input_data_file.read()
@@ -39,7 +40,11 @@ class TestFitness(unittest.TestCase):
         # load infrastructure
         self.infra = Infrastructure(file_infrastructure).load()
 
-        self.problem = TravelingModel(file_infrastructure, input_pipeline)
+        self.problem = TravelingModel(
+            file_infrastructure=file_infrastructure,
+            file_latencies=file_latencies,
+            input_pipeline=input_pipeline,
+        )
 
         # number of models
         # number_of_models = self.p.shape[1]
@@ -87,7 +92,7 @@ class TestFitness(unittest.TestCase):
         self.assertEqual(consumption, sum([c[0] for c in self.infra.consumption]))
 
     def test_latency(self):
-        ld = np.loadtxt("tests/resources/latencies", dtype=float)
+        ld = np.loadtxt("tests/resources/latencies.csv", dtype=float)
         ld = np.reshape(ld, (20, 1, 20))
 
         latency = Objectives().get_latency(ld, self.pipe, self.infra, self.sol_zeros)

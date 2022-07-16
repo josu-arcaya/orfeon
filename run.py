@@ -19,7 +19,7 @@ from jmetal.util.termination_criterion import StoppingByEvaluations, StoppingByT
 LOGGER = logging.getLogger("optimizer")
 
 
-def generate_barchar(file_infrastructure):
+def generate_barchar(file_infrastructure, file_latencies):
     total_times = []
     pipelines = [
         "pipeline_5.yml",
@@ -39,6 +39,7 @@ def generate_barchar(file_infrastructure):
             LOGGER.info(f"Executing iteration {i} of {file_pipeline}.")
             Optimizer(
                 file_infrastructure=file_infrastructure,
+                file_latencies=file_latencies,
                 input_pipeline=input_pipeline,
                 termination_criterion=StoppingByTotalDominance(idle_evaluations=40),
             ).run()
@@ -54,13 +55,14 @@ def generate_barchar(file_infrastructure):
         writer.writerows(total_times)
 
 
-def generate_pareto(file_infrastructure):
+def generate_pareto(file_infrastructure, file_latencies):
     file_pipeline = f"src/resources/pipeline_10.yml"
     population_size = 100
     with open(file_pipeline, "r") as input_data_file:
         input_pipeline = input_data_file.read()
     o = Optimizer(
         file_infrastructure=file_infrastructure,
+        file_latencies=file_latencies,
         input_pipeline=input_pipeline,
         termination_criterion=StoppingByFullPareto(offspring_size=population_size),
         population_size=population_size,
@@ -70,12 +72,13 @@ def generate_pareto(file_infrastructure):
     pt.save()
 
 
-def generate_fitnesses(file_infrastructure):
+def generate_fitnesses(file_infrastructure, file_latencies):
     file_pipeline = f"src/resources/pipeline_20.yml"
     with open(file_pipeline, "r") as input_data_file:
         input_pipeline = input_data_file.read()
     Optimizer(
         file_infrastructure=file_infrastructure,
+        file_latencies=file_latencies,
         input_pipeline=input_pipeline,
         # termination_criterion=StoppingByTotalDominance(idle_evaluations=100),
         termination_criterion=StoppingByEvaluations(max_evaluations=40 * 2000),
@@ -84,12 +87,13 @@ def generate_fitnesses(file_infrastructure):
     ).run()
 
 
-def generate_memory(file_infrastructure, number_of_models):
+def generate_memory(file_infrastructure, file_latencies, number_of_models):
     file_pipeline = f"src/resources/pipeline_{number_of_models}.yml"
     with open(file_pipeline, "r") as input_data_file:
         input_pipeline = input_data_file.read()
     Optimizer(
         file_infrastructure=file_infrastructure,
+        file_latencies=file_latencies,
         input_pipeline=input_pipeline,
         termination_criterion=StoppingByTime(max_seconds=300),
     ).run()
@@ -136,18 +140,29 @@ def main():
     )
 
     file_infrastructure = "src/resources/infrastructure.csv"
+    file_latencies = "src/resources/latencies.csv"
 
     if args.times:
-        generate_barchar(file_infrastructure)
+        generate_barchar(
+            file_infrastructure=file_infrastructure, file_latencies=file_latencies
+        )
 
     if args.pareto:
-        generate_pareto(file_infrastructure)
+        generate_pareto(
+            file_infrastructure=file_infrastructure, file_latencies=file_latencies
+        )
 
     if args.fitnesses:
-        generate_fitnesses(file_infrastructure)
+        generate_fitnesses(
+            file_infrastructure=file_infrastructure, file_latencies=file_latencies
+        )
 
     if args.memory:
-        generate_memory(file_infrastructure, args.memory)
+        generate_memory(
+            file_infrastructure=file_infrastructure,
+            file_latencies=file_latencies,
+            number_of_models=args.memory,
+        )
 
 
 if __name__ == "__main__":
