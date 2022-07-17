@@ -1,3 +1,4 @@
+from email.mime import base
 import json
 import logging
 import numpy as np
@@ -112,7 +113,13 @@ class Objectives():
         x = np.ma.masked_array(x, mask=s==0)
         return np.nanmin(x,axis=1).sum()
 
-    def get_latency(self, ld: np.array, pipe: Pipeline, infra: Infrastructure, solution: BinarySolution) -> int:
+    # https://blog.devgenius.io/linux-how-to-measure-network-performance-c859a98abbf0
+    def get_network_performance(self, ld: np.array, pipe: Pipeline, infra: Infrastructure, solution: BinarySolution) -> int:
+
+        # bandwidth
+        # throughput
+        # latency
+
         s = np.asfarray(solution.variables, dtype=np.bool)
         
         z = s*ld.transpose()
@@ -132,8 +139,13 @@ class Objectives():
         #print(c.shape)
 
         z*c.transpose()
+        
+        base_bandwidth = s.dot(infra.bandwidth.to_numpy()).sum()
 
-        return np.sum(z)
+        # check the latency
+        return base_bandwidth
+
+        #return base_bandwidth + np.sum(z)
 
 
 class WriteObjectivesToFileObserver(Observer):
@@ -157,10 +169,11 @@ class WriteObjectivesToFileObserver(Observer):
         #objective1 = s[np.argsort(s[:,1])][0][1]
         objective2 = s[np.argsort(s[:,2])][:3].mean(0)[2]
         #objective2 = s[np.argsort(s[:,2])][0][2]
+        objective3 = s[np.argsort(s[:,3])][:3].mean(0)[3]
         
         with open(self.filename, 'a') as out_file:
             #out_file.write(f"{abs(means[0])},{abs(means[1])},{abs(means[2])}\n")
-            out_file.write(f"{abs(objective0)},{abs(objective1)},{abs(objective2)}\n")
+            out_file.write(f"{abs(objective0)},{abs(objective1)},{abs(objective2)},{abs(objective3)}\n")
 
 class StoppingByNonDominance(TerminationCriterion):
 

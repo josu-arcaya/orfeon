@@ -43,7 +43,9 @@ class TravelingModel(BinaryProblem):
         self.infra = Infrastructure(file_infrastructure).load()
         self.pipe = Pipeline(input_pipeline).load()
         # self.ld = np.loadtxt("src/resources/latencies.csv", dtype=float)
-        # self.ld = np.reshape(self.ld, (50, 1, 50))
+        self.ld = np.loadtxt(file_latencies, dtype=float)
+        s0, s1 = self.ld.shape
+        self.ld = np.reshape(self.ld, (s0, 1, s1))
 
         # number of models
         # self.number_of_models = self.pipe.shape[1]
@@ -71,7 +73,9 @@ class TravelingModel(BinaryProblem):
         solution.objectives[2] = self.objectives.get_consumption(
             self.pipe, self.infra, solution
         )
-        # solution.objectives[3] = -1 * self.objectives.get_latency(ld=self.ld, pipe=self.pipe, infra=self.infra, solution=solution)
+        solution.objectives[3] = -1 * self.objectives.get_network_performance(
+            ld=self.ld, pipe=self.pipe, infra=self.infra, solution=solution
+        )
 
         self.__evaluate_constraints(solution)
 
@@ -182,6 +186,7 @@ class Optimizer:
             problem=self.problem,
             population_size=self.population_size,
             # offspring_population_size=self.population_size,
+            # reference_directions=UniformReferenceDirectionFactory(4, n_points=92),
             reference_directions=UniformReferenceDirectionFactory(4, n_points=92),
             mutation=BitFlipMutation(probability=1.0 / self.problem.number_of_devices),
             crossover=SPXCrossover(probability=1.0),

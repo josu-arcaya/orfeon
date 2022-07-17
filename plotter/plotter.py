@@ -57,8 +57,8 @@ def fitness(objective: int):
 
     data = np.genfromtxt(filename, delimiter=',')
 
-    ylabel = ['Resilience', 'Performance', 'Cost']
-    color = ['red', 'green', 'blue']
+    ylabel = ['Resilience', 'Performance', 'Cost', 'Latency']
+    color = ['red', 'green', 'blue', 'yellow']
 
     plt.figure()
     #from matplotlib import rcParams
@@ -76,6 +76,7 @@ def fitness(objective: int):
 
     #plt.show()
     plt.grid(True)
+    plt.tight_layout()
     plt.savefig(f"/tmp/fitness{objective}.svg")
 
 def read_times(filename: str):
@@ -174,9 +175,9 @@ def memory():
     plt.savefig(f"/tmp/memory.svg")
 
 def main():
-    pareto()
-    #for o in range(3):
-    #    fitness(objective=o)
+    # pareto()
+    for o in range(4):
+        fitness(objective=o)
     #times()
     #memory()
 

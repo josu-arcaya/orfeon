@@ -76,14 +76,17 @@ def generate_fitnesses(file_infrastructure, file_latencies):
     file_pipeline = f"src/resources/pipeline_20.yml"
     with open(file_pipeline, "r") as input_data_file:
         input_pipeline = input_data_file.read()
+
+    population_size = 200
     Optimizer(
         file_infrastructure=file_infrastructure,
         file_latencies=file_latencies,
         input_pipeline=input_pipeline,
         # termination_criterion=StoppingByTotalDominance(idle_evaluations=100),
-        termination_criterion=StoppingByEvaluations(max_evaluations=40 * 2000),
+        # termination_criterion=StoppingByEvaluations(max_evaluations=40 * 2000),
+        termination_criterion=StoppingByEvaluations(max_evaluations=population_size * 2000),
         observer=WriteObjectivesToFileObserver(),
-        population_size=40,
+        population_size=population_size,
     ).run()
 
 
