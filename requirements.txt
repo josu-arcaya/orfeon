@@ -3,3 +3,4 @@ nose2==0.9.1
 PyYAML==5.1.2
 pycountry_convert==0.7.2
 pycountry==20.7.3
+sklearn==0.0

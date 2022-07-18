@@ -57,7 +57,7 @@ def fitness(objective: int):
 
     data = np.genfromtxt(filename, delimiter=',')
 
-    ylabel = ['Resilience', 'Performance', 'Cost', 'Latency']
+    ylabel = ['Resilience', 'Performance', 'Cost', 'Network Performance']
     color = ['red', 'green', 'blue', 'yellow']
 
     plt.figure()

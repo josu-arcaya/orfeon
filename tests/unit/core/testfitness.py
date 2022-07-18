@@ -5,10 +5,11 @@ import unittest
 import logging
 import numpy as np
 from jmetal.core.problem import BinaryProblem
+#from sklearn import preprocessing
 
 from src.core.optimizer import TravelingModel, Optimizer
 from jmetal.core.solution import BinarySolution
-from src.core.utils import Infrastructure, Pipeline, Objectives
+from src.core.utils import Infrastructure, Pipeline, Objectives, Latency
 
 
 class TestFitness(unittest.TestCase):
@@ -39,6 +40,8 @@ class TestFitness(unittest.TestCase):
         self.pipe = Pipeline(input_pipeline).load()
         # load infrastructure
         self.infra = Infrastructure(file_infrastructure).load()
+        # load latencies
+        self.ld = Latency(file_location=file_latencies).load()
 
         self.problem = TravelingModel(
             file_infrastructure=file_infrastructure,
@@ -92,15 +95,13 @@ class TestFitness(unittest.TestCase):
         self.assertEqual(consumption, sum([c[0] for c in self.infra.consumption]))
 
     def test_latency(self):
-        ld = np.loadtxt("tests/resources/latencies.csv", dtype=float)
-        ld = np.reshape(ld, (20, 1, 20))
 
-        latency = Objectives().get_network_performance(ld, self.pipe, self.infra, self.sol_zeros)
-        self.assertEqual(latency, 0)
+        network_performance = Objectives().get_network_performance(self.ld, self.pipe, self.infra, self.sol_zeros)
+        self.assertEqual(network_performance, 0)
 
-        latency = Objectives().get_network_performance(ld, self.pipe, self.infra, self.sol_ones)
+        network_performance = Objectives().get_network_performance(self.ld, self.pipe, self.infra, self.sol_ones)
         #self.assertEqual(int(latency), 44026)
-        self.assertGreater(latency, 0)
+        self.assertGreater(network_performance, 0)
 
     """
     def setUp(self):

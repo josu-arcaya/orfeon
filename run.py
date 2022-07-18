@@ -57,7 +57,7 @@ def generate_barchar(file_infrastructure, file_latencies):
 
 def generate_pareto(file_infrastructure, file_latencies):
     file_pipeline = f"src/resources/pipeline_10.yml"
-    population_size = 100
+    population_size = 80
     with open(file_pipeline, "r") as input_data_file:
         input_pipeline = input_data_file.read()
     o = Optimizer(
@@ -77,7 +77,7 @@ def generate_fitnesses(file_infrastructure, file_latencies):
     with open(file_pipeline, "r") as input_data_file:
         input_pipeline = input_data_file.read()
 
-    population_size = 200
+    population_size = 100
     Optimizer(
         file_infrastructure=file_infrastructure,
         file_latencies=file_latencies,
