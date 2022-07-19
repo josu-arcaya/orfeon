@@ -37,12 +37,14 @@ class Parser:
     def file2obj(self, data):
         pass
 
-class Latency:
 
+class Latency:
     def __init__(self, file_location: str):
         ld = np.loadtxt(file_location, dtype=float)
         x, y = ld.shape
-        ld /= (ld.max()*(x*y))
+        # normalize
+        ld /= ld.max() * (x * y)
+
         self.ld = np.reshape(ld, (x, 1, y))
 
     def load(self):
@@ -55,6 +57,13 @@ class Infrastructure:
 
         x = lambda txt: np.fromstring(txt[1:-1], sep=",")
         self.infrastructure.consumption = self.infrastructure.consumption.apply(x)
+
+        # normalize consumption
+        my_max = self.infrastructure.consumption.apply(max).max()
+        my_min = self.infrastructure.consumption.apply(min).min()
+
+        self.infrastructure.consumption = (self.infrastructure.consumption - my_min ) / (my_max - my_min)
+
         self.infrastructure.parallelization = self.infrastructure.parallelization.apply(
             x
         )
@@ -70,8 +79,25 @@ class Infrastructure:
         ]
         self.infrastructure["continent"] = self.infrastructure.apply(z, axis=1)
 
+        # normalize bandwidth
         self.infrastructure.bandwidth = (
             self.infrastructure.bandwidth / self.infrastructure.bandwidth.max()
+        )
+
+        # normalize performance
+        self.infrastructure.performance = (
+            self.infrastructure.performance - self.infrastructure.performance.min()
+        ) / (
+            self.infrastructure.performance.max()
+            - self.infrastructure.performance.min()
+        )
+
+        # normalize resilience
+        self.infrastructure.resillience = (
+           self.infrastructure.resillience - self.infrastructure.resillience.min()
+        ) / (
+           self.infrastructure.resillience.max()
+           - self.infrastructure.resillience.min()
         )
 
     def load(self):
@@ -141,7 +167,9 @@ class Objectives:
         consumption = [
             m[min(n, len(m) - 1)] for m, n in zip(infra.consumption, threads_required)
         ]
-        return sum(consumption)
+
+        _, number_of_devices = s.shape
+        return sum(consumption) / number_of_devices
 
     def get_performance(
         self, pipe: Pipeline, infra: Infrastructure, solution: BinarySolution
@@ -157,7 +185,8 @@ class Objectives:
             for m, n in zip(infra.parallelization, threads_required)
         ]
 
-        return (base_performance * coefficient).max(1).sum()
+        number_of_models, _ = s.shape
+        return (base_performance * coefficient).max(1).sum() / number_of_models
         # return (base_performance*coefficient).mean(1).sum()
 
     def get_resilience(self, infra: Infrastructure, solution: BinarySolution) -> int:
@@ -166,7 +195,10 @@ class Objectives:
             return 0
         x = s * infra.resillience.to_numpy()
         x = np.ma.masked_array(x, mask=s == 0)
-        return np.nanmin(x, axis=1).sum()
+
+        number_of_models, _ = s.shape
+        #return np.nanmin(x, axis=1).sum() / number_of_models
+        return np.nanmean(x, axis=1).sum() / number_of_models
 
     # https://blog.devgenius.io/linux-how-to-measure-network-performance-c859a98abbf0
     def get_network_performance(
@@ -211,7 +243,7 @@ class Objectives:
 
         number_of_models, _ = s.shape
         return (base_bandwidth.max(1).sum() - np.sum(base_latency)) / number_of_models
-        #return base_bandwidth.max(1).sum()
+        # return base_bandwidth.max(1).sum()
 
         # return base_bandwidth + np.sum(z)
 

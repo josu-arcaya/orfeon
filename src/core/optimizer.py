@@ -45,9 +45,9 @@ class TravelingModel(BinaryProblem):
         self.pipe = Pipeline(input_pipeline).load()
         # self.ld = np.loadtxt("src/resources/latencies.csv", dtype=float)
         self.ld = Latency(file_location=file_latencies).load()
-        #self.ld = np.loadtxt(file_latencies, dtype=float)
-        #s0, s1 = self.ld.shape
-        #self.ld = np.reshape(self.ld, (s0, 1, s1))
+        # self.ld = np.loadtxt(file_latencies, dtype=float)
+        # s0, s1 = self.ld.shape
+        # self.ld = np.reshape(self.ld, (s0, 1, s1))
 
         # number of models
         # self.number_of_models = self.pipe.shape[1]
@@ -67,16 +67,16 @@ class TravelingModel(BinaryProblem):
     def evaluate(self, solution: BinarySolution) -> BinarySolution:
         self.objectives = Objectives()
         solution.objectives[0] = -1 * self.objectives.get_resilience(
-           self.infra, solution
+            self.infra, solution
         )
         solution.objectives[1] = -1 * self.objectives.get_performance(
-           self.pipe, self.infra, solution
+          self.pipe, self.infra, solution
         )
         solution.objectives[2] = self.objectives.get_consumption(
-           self.pipe, self.infra, solution
+          self.pipe, self.infra, solution
         )
         solution.objectives[3] = -1 * self.objectives.get_network_performance(
-            ld=self.ld, pipe=self.pipe, infra=self.infra, solution=solution
+           ld=self.ld, pipe=self.pipe, infra=self.infra, solution=solution
         )
 
         self.__evaluate_constraints(solution)
@@ -149,7 +149,7 @@ class TravelingModel(BinaryProblem):
         """
         for i in range(self.number_of_models):
             new_solution.variables[i] = [
-                True if random.random() > 0.9 else False
+                True if random.random() > 0.8 else False
                 for _ in range(self.number_of_devices)
             ]
             # [True if random.randint(0, 1) == 0 else False for _ in range(self.number_of_devices)]

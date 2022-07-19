@@ -77,7 +77,7 @@ def generate_fitnesses(file_infrastructure, file_latencies):
     with open(file_pipeline, "r") as input_data_file:
         input_pipeline = input_data_file.read()
 
-    population_size = 100
+    population_size = 40
     Optimizer(
         file_infrastructure=file_infrastructure,
         file_latencies=file_latencies,
