@@ -152,7 +152,7 @@ class ParetoTools:
         with open(filename, "w") as pareto_file:
             for s in self.front:
                 pareto_file.write(
-                    f"{abs(s.objectives[0])},{abs(s.objectives[1])},{s.objectives[2]}\n"
+                    f"{abs(s.objectives[0])},{abs(s.objectives[1])},{s.objectives[2]},{abs(s.objectives[3])}\n"
                 )
 
 

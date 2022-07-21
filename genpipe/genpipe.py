@@ -79,7 +79,7 @@ def main():
             memory=memory,
             location=random.choice(total_location),
             privacy_type=random.randint(0, 2),
-            link=random.randint(0, number_of_models),
+            link=random.randint(0, number_of_models - 1),
         )
         p.pipeline.append(m.__dict__)
 

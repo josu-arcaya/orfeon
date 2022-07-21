@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import logging
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
@@ -9,9 +10,11 @@ import os
 
 import matplotlib.pylab as pl
 from mpl_toolkits.mplot3d import Axes3D
+from math import sqrt
+from matplotlib.colors import LinearSegmentedColormap
 
 
-def pareto():
+def pareto2():
     filename = "/tmp/pareto"
     if not os.path.isfile(filename):
         return
@@ -215,42 +218,56 @@ def memory():
 
 
 def pareto():
+
+    filename = "/tmp/pareto"
+    if not os.path.isfile(filename):
+        logging.error(f"There is no {filename} file.")
+        return
+
+    data = np.genfromtxt(filename, delimiter=",")
+
+    colors = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3"]
+
     plt.close("all")
+    _, axis = plt.subplots(4, 4, figsize=(15, 15))
 
-    import math
+    for i in range(4):
+        for j in range(4):
+            cm = LinearSegmentedColormap.from_list("", [colors[i], colors[j]])
 
-    # Get the angles from 0 to 2 pie (360 degree) in narray object
-    X = np.arange(0, math.pi * 2, 0.05)
+            y_max = data[:, i].max()
+            y_min = data[:, i].min()
+            x_max = data[:, j].max()
+            x_min = data[:, j].min()
+            print(i, j, x_max, x_min, y_max, y_min)
 
-    # Using built-in trigonometric function we can directly plot
-    # the given cosine wave for the given angles
-    Y1 = np.sin(X)
-    Y2 = np.cos(X)
-    Y3 = np.tan(X)
-    Y4 = np.tanh(X)
+            my_colors = []
+            for x, y in zip(data[:, j], data[:, i]):
+                distance1 = sqrt((x_min - x) ** 2 + (y_max - y) ** 2)
+                distance2 = sqrt((x_max - x) ** 2 + (y_min - y) ** 2)
+                ratio = int((distance1 / (distance1 + distance2)) * 255)
+                my_colors.append(cm(ratio))
 
-    # Initialise the subplot function using number of rows and columns
-    figure, axis = plt.subplots(2, 2)
+            axis[i, j].scatter(data[:, j], data[:, i], c=my_colors)
+            axis[i, j].set_xticklabels([])
+            axis[i, j].set_yticklabels([])
 
-    # For Sine Function
-    axis[0, 0].plot(X, Y1)
-    axis[0, 0].set_title("Sine Function")
+    # set Y labels
+    axis[0, 0].set_ylabel("Resilience")
+    axis[1, 0].set_ylabel("Model Performance")
+    axis[2, 0].set_ylabel("Cost")
+    axis[3, 0].set_ylabel("Network Performance")
 
-    # For Cosine Function
-    axis[0, 1].plot(X, Y2)
-    axis[0, 1].set_title("Cosine Function")
-
-    # For Tangent Function
-    axis[1, 0].plot(X, Y3)
-    axis[1, 0].set_title("Tangent Function")
-
-    # For Tanh Function
-    axis[1, 1].plot(X, Y4)
-    axis[1, 1].set_title("Tanh Function")
+    # set X labels
+    axis[3, 0].set_xlabel("Resilience")
+    axis[3, 1].set_xlabel("Model Performance")
+    axis[3, 2].set_xlabel("Cost")
+    axis[3, 3].set_xlabel("Network Performance")
 
     plt.tight_layout()
     # Combine all the operations and display
-    plt.show()
+    #plt.show()
+    plt.savefig(f"/tmp/pareto.svg")
 
 
 def main():
