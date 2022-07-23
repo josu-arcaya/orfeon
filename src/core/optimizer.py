@@ -16,6 +16,7 @@ from src.core.utils import (
     StoppingByNonDominance,
     StoppingByTotalDominance,
     StoppingByFullPareto,
+    Constraints,
 )
 
 from jmetal.algorithm.multiobjective.nsgaii import NSGAII
@@ -243,40 +244,3 @@ class Optimizer:
         # print variables and fitnesses
         print_function_values_to_file(self.front, "FUN." + self.algorithm.label)
         print_variables_to_file(self.front, "VAR." + self.algorithm.label)
-
-
-class Constraints:
-    def __init__(self, solution, infra, pipe):
-        self.s = np.asfarray(solution.variables, dtype=np.bool)
-        self.infra = infra
-        self.pipe = pipe
-
-    def __privacy(self, location, type):
-        # the location of the devices
-        location_devices = self.infra[location].to_numpy()
-        # the location of the models
-        location_models = self.pipe[location].to_numpy()
-
-        # the location of the devices for the given solution
-        sol_loc_dev = self.s * location_devices
-        # the location of the models for the given solution
-        sol_loc_mod = self.s * location_models[np.newaxis].T
-
-        # models with privacy type equals to {type}
-        privacy_mask = np.where(self.pipe.privacy_type.to_numpy() == type, 1, 0)[
-            np.newaxis
-        ].T
-
-        # apply the mask for the given type
-        device_matrix = sol_loc_dev * privacy_mask
-        model_matrix = sol_loc_mod * privacy_mask
-
-        # returns true if both matrixes are equal
-        return (device_matrix == model_matrix).all()
-
-    def privacy_constraint(self):
-        if not self.__privacy("country", 2):
-            return -1
-        if not self.__privacy("continent", 1):
-            return -1
-        return 0

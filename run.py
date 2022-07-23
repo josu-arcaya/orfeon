@@ -21,6 +21,8 @@ LOGGER = logging.getLogger("optimizer")
 
 def evaluate_solution(file_solution: str):
     e = Evaluate(file_solution=file_solution)
+    print(f"Constraints.Privacy = {e.constraint_privacy()}")
+
     print(f"Cost = {e.cost()}")
     print(f"Model Performance = {e.model_performance()}")
     print(f"Resilience = {e.resilience()}")
