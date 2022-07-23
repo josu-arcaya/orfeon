@@ -13,11 +13,18 @@ from src.core.utils import (
     StoppingByFullPareto,
     WriteObjectivesToFileObserver,
     ParetoTools,
+    Evaluate,
 )
 from jmetal.util.termination_criterion import StoppingByEvaluations, StoppingByTime
 
 LOGGER = logging.getLogger("optimizer")
 
+def evaluate_solution(file_solution: str):
+    e = Evaluate(file_solution=file_solution)
+    print(f"Cost = {e.cost()}")
+    print(f"Model Performance = {e.model_performance()}")
+    print(f"Resilience = {e.resilience()}")
+    print(f"Network Performance = {e.network_performance()}")
 
 def generate_barchar(file_infrastructure, file_latencies):
     total_times = []
@@ -57,15 +64,15 @@ def generate_barchar(file_infrastructure, file_latencies):
 
 def generate_pareto(file_infrastructure, file_latencies):
     file_pipeline = f"src/resources/pipeline_40.yml"
-    population_size = 140
+    population_size = 200
     with open(file_pipeline, "r") as input_data_file:
         input_pipeline = input_data_file.read()
     o = Optimizer(
         file_infrastructure=file_infrastructure,
         file_latencies=file_latencies,
         input_pipeline=input_pipeline,
-        termination_criterion=StoppingByFullPareto(offspring_size=population_size),
-        #termination_criterion=StoppingByTime(max_seconds=7200),
+        # termination_criterion=StoppingByFullPareto(offspring_size=population_size),
+        termination_criterion=StoppingByTime(max_seconds=180),
         population_size=population_size,
     )
     o.run()
@@ -74,8 +81,8 @@ def generate_pareto(file_infrastructure, file_latencies):
 
 
 def generate_fitnesses(file_infrastructure, file_latencies):
-    file_pipeline = f"src/resources/pipeline_20.yml"
-    population_size = 40
+    file_pipeline = f"src/resources/pipeline_40.yml"
+    population_size = 80
     with open(file_pipeline, "r") as input_data_file:
         input_pipeline = input_data_file.read()
     Optimizer(
@@ -84,7 +91,9 @@ def generate_fitnesses(file_infrastructure, file_latencies):
         input_pipeline=input_pipeline,
         # termination_criterion=StoppingByTotalDominance(idle_evaluations=100),
         # termination_criterion=StoppingByEvaluations(max_evaluations=40 * 2000),
-        termination_criterion=StoppingByEvaluations(max_evaluations=population_size * 2000),
+        termination_criterion=StoppingByEvaluations(
+            max_evaluations=population_size * 2000
+        ),
         observer=WriteObjectivesToFileObserver(),
         population_size=population_size,
     ).run()
@@ -135,6 +144,14 @@ def main():
         help="Indicate number of models (e.g., 5, 10, 20, 40, 80)",
         required=False,
     )
+    required.add_argument(
+        "-e",
+        "--evaluate",
+        type=str,
+        default=None,
+        help="Indicate a csv solution",
+        required=False,
+    )
 
     args = parser.parse_args()
 
@@ -166,6 +183,9 @@ def main():
             file_latencies=file_latencies,
             number_of_models=args.memory,
         )
+
+    if args.evaluate:
+        evaluate_solution(file_solution=args.evaluate)
 
 
 if __name__ == "__main__":

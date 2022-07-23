@@ -62,7 +62,9 @@ class Infrastructure:
         my_max = self.infrastructure.consumption.apply(max).max()
         my_min = self.infrastructure.consumption.apply(min).min()
 
-        self.infrastructure.consumption = (self.infrastructure.consumption - my_min ) / (my_max - my_min)
+        self.infrastructure.consumption = (self.infrastructure.consumption - my_min) / (
+            my_max - my_min
+        )
 
         self.infrastructure.parallelization = self.infrastructure.parallelization.apply(
             x
@@ -94,10 +96,10 @@ class Infrastructure:
 
         # normalize resilience
         self.infrastructure.resillience = (
-           self.infrastructure.resillience - self.infrastructure.resillience.min()
+            self.infrastructure.resillience - self.infrastructure.resillience.min()
         ) / (
-           self.infrastructure.resillience.max()
-           - self.infrastructure.resillience.min()
+            self.infrastructure.resillience.max()
+            - self.infrastructure.resillience.min()
         )
 
     def load(self):
@@ -197,7 +199,7 @@ class Objectives:
         x = np.ma.masked_array(x, mask=s == 0)
 
         number_of_models, _ = s.shape
-        #return np.nanmin(x, axis=1).sum() / number_of_models
+        # return np.nanmin(x, axis=1).sum() / number_of_models
         return np.nanmean(x, axis=1).sum() / number_of_models
 
     # https://blog.devgenius.io/linux-how-to-measure-network-performance-c859a98abbf0
@@ -352,3 +354,50 @@ class StoppingByFullPareto(TerminationCriterion):
     @property
     def is_met(self):
         return self.offspring_size <= self.current_offspring_size
+
+
+class Evaluate:
+    def __init__(self, file_solution: str):
+        self.file_solution = file_solution
+
+        s = np.genfromtxt(file_solution, delimiter=",")
+        number_of_models, number_of_devices = s.shape
+
+        self.solution = BinarySolution(
+            number_of_variables=number_of_models, number_of_objectives=1
+        )
+        for i in range(number_of_models):
+            self.solution.variables[i] = [False for _ in range(number_of_devices)]
+
+        for i in range(number_of_models):
+            for j in range(number_of_devices):
+                if s[i][j]:
+                    self.solution.variables[i][j] = True
+
+        file_infrastructure = "src/resources/infrastructure.csv"
+        pipeline_location = "src/resources/pipeline_40.yml"
+        with open(pipeline_location, "r") as input_data_file:
+            input_pipeline = input_data_file.read()
+
+        # load pipeline
+        self.pipe = Pipeline(input_pipeline).load()
+        # load infrastructure
+        self.infra = Infrastructure(file_infrastructure).load()
+
+    def cost(self) -> float:
+        cost = Objectives().get_consumption(self.pipe, self.infra, self.solution)
+        return cost
+
+    def model_performance(self) -> float:
+        model_performance = Objectives().get_performance(self.pipe, self.infra, self.solution)
+        return model_performance
+
+    def resilience(self) -> float:
+        resilience = Objectives().get_resilience(self.infra, self.solution)
+        return resilience
+
+    def network_performance(self) -> float:
+        file_latencies = "src/resources/latencies.csv"
+        ld = Latency(file_location=file_latencies).load()
+        network_performance = Objectives().get_network_performance(ld, self.pipe, self.infra, self.solution)
+        return network_performance

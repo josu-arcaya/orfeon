@@ -149,7 +149,7 @@ class TravelingModel(BinaryProblem):
         """
         for i in range(self.number_of_models):
             new_solution.variables[i] = [
-                True if random.random() > 0.8 else False
+                True if random.random() > 0.9 else False
                 for _ in range(self.number_of_devices)
             ]
             # [True if random.randint(0, 1) == 0 else False for _ in range(self.number_of_devices)]

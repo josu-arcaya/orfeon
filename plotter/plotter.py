@@ -63,7 +63,8 @@ def fitness(objective: int):
     data = np.genfromtxt(filename, delimiter=",")
 
     ylabel = ["Resilience", "Model Performance", "Cost", "Network Performance"]
-    color = ["red", "green", "blue", "yellow"]
+    # color = ["red", "green", "blue", "yellow"]
+    color = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3"]
 
     plt.figure()
     # from matplotlib import rcParams
@@ -229,6 +230,7 @@ def pareto():
     colors = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3"]
 
     plt.close("all")
+    plt.rcParams["svg.fonttype"] = "none"
     _, axis = plt.subplots(4, 4, figsize=(15, 15))
 
     for i in range(4):
@@ -266,7 +268,7 @@ def pareto():
 
     plt.tight_layout()
     # Combine all the operations and display
-    #plt.show()
+    # plt.show()
     plt.savefig(f"/tmp/pareto.svg")
 
 
