@@ -218,6 +218,35 @@ def memory():
     plt.savefig(f"/tmp/memory.svg")
 
 
+def get_single_color(data, i: int, j: int, x: float, y: float):
+    colors = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3"]
+    cm = LinearSegmentedColormap.from_list("", [colors[i], colors[j]])
+
+    if i == j:
+        return colors[i]
+
+    y_max = data[:, i].max()
+    y_min = data[:, i].min()
+    x_max = data[:, j].max()
+    x_min = data[:, j].min()
+    for x2, y2 in zip(data[:, j], data[:, i]):
+        if i == 2 and y2 < y and x2 > x:
+            return "lightgrey"
+        elif j == 2 and x2 < x and y2 > y:
+            return "lightgrey"
+        elif i != 2 and j!= 2 and x2 > x and y2 > y:
+            return "lightgrey"
+    distance1 = sqrt((x_min - x) ** 2 + (y_max - y) ** 2)
+    distance2 = sqrt((x_max - x) ** 2 + (y_min - y) ** 2)
+    ratio = int((distance1 / (distance1 + distance2)) * 255)
+    return cm(ratio)
+
+
+def get_colors(data, i: int, j: int):
+    for x, y in zip(data[:, j], data[:, i]):
+        yield get_single_color(data=data, i=i, j=j, x=x, y=y)
+
+
 def pareto():
 
     filename = "/tmp/pareto"
@@ -227,28 +256,14 @@ def pareto():
 
     data = np.genfromtxt(filename, delimiter=",")
 
-    colors = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3"]
-
     plt.close("all")
     plt.rcParams["svg.fonttype"] = "none"
     _, axis = plt.subplots(4, 4, figsize=(15, 15))
 
     for i in range(4):
         for j in range(4):
-            cm = LinearSegmentedColormap.from_list("", [colors[i], colors[j]])
 
-            y_max = data[:, i].max()
-            y_min = data[:, i].min()
-            x_max = data[:, j].max()
-            x_min = data[:, j].min()
-            print(i, j, x_max, x_min, y_max, y_min)
-
-            my_colors = []
-            for x, y in zip(data[:, j], data[:, i]):
-                distance1 = sqrt((x_min - x) ** 2 + (y_max - y) ** 2)
-                distance2 = sqrt((x_max - x) ** 2 + (y_min - y) ** 2)
-                ratio = int((distance1 / (distance1 + distance2)) * 255)
-                my_colors.append(cm(ratio))
+            my_colors = list(get_colors(data=data, j=j, i=i))
 
             axis[i, j].scatter(data[:, j], data[:, i], c=my_colors)
             axis[i, j].set_xticklabels([])
