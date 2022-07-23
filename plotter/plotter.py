@@ -234,7 +234,7 @@ def get_single_color(data, i: int, j: int, x: float, y: float):
             return "lightgrey"
         elif j == 2 and x2 < x and y2 > y:
             return "lightgrey"
-        elif i != 2 and j!= 2 and x2 > x and y2 > y:
+        elif i != 2 and j != 2 and x2 > x and y2 > y:
             return "lightgrey"
     distance1 = sqrt((x_min - x) ** 2 + (y_max - y) ** 2)
     distance2 = sqrt((x_max - x) ** 2 + (y_min - y) ** 2)
@@ -284,7 +284,6 @@ def pareto():
 
     plt.tight_layout()
     # Combine all the operations and display
-    # plt.show()
     plt.savefig(f"/tmp/pareto.svg")
 
 
@@ -306,6 +305,13 @@ def main():
         help="Generate Pultiplot.",
         required=False,
     )
+    required.add_argument(
+        "-t",
+        "--times",
+        action="store_true",
+        help="Generate Times Plot.",
+        required=False,
+    )
 
     args = parser.parse_args()
 
@@ -315,8 +321,10 @@ def main():
 
     if args.pareto:
         pareto()
-    # pareto()
-    # times()
+
+    if args.times:
+        times()
+
     # memory()
 
     plt.show()
