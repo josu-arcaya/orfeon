@@ -254,17 +254,18 @@ def pareto():
             axis[i, j].set_xticklabels([])
             axis[i, j].set_yticklabels([])
 
+    labels = ["Resilience", "Model Performance", "Cost", "Network Performance"]
     # set Y labels
-    axis[0, 0].set_ylabel("Resilience")
-    axis[1, 0].set_ylabel("Model Performance")
-    axis[2, 0].set_ylabel("Cost")
-    axis[3, 0].set_ylabel("Network Performance")
+    axis[0, 0].set_ylabel(labels[0])
+    axis[1, 0].set_ylabel(labels[1])
+    axis[2, 0].set_ylabel(labels[2])
+    axis[3, 0].set_ylabel(labels[3])
 
     # set X labels
-    axis[3, 0].set_xlabel("Resilience")
-    axis[3, 1].set_xlabel("Model Performance")
-    axis[3, 2].set_xlabel("Cost")
-    axis[3, 3].set_xlabel("Network Performance")
+    axis[3, 0].set_xlabel(labels[0])
+    axis[3, 1].set_xlabel(labels[1])
+    axis[3, 2].set_xlabel(labels[2])
+    axis[3, 3].set_xlabel(labels[3])
 
     plt.tight_layout()
     # Combine all the operations and display
