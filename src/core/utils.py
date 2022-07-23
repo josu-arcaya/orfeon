@@ -391,6 +391,23 @@ class Constraints:
             return -1
         return 0
 
+    def cpu_constraint(self):
+        x = self.s.transpose() * self.pipe.cpus.to_numpy()
+        sum_rows = np.sum(x, axis=1)
+        thread_count = self.infra.thread_count.to_numpy()
+        return 0 if not (thread_count < sum_rows).any() else -1
+
+    def deployment_constraint(self):
+        sum_rows = np.sum(self.s, axis=1)
+        # the sum of all rows should be bigger or equal to one
+        return 0 if not (sum_rows < 1).any() else -1
+
+    def ram_constraint(self):
+        x = self.s.transpose() * self.pipe.memory.to_numpy()
+        sum_rows = np.sum(x, axis=1)
+        memory = self.infra.memory.to_numpy()
+        return 0 if not (memory < sum_rows).any() else -1
+
 class Evaluate:
     def __init__(self, file_solution: str):
         self.file_solution = file_solution
@@ -419,6 +436,8 @@ class Evaluate:
         # load infrastructure
         self.infra = Infrastructure(file_infrastructure).load()
 
+        self.c = Constraints(self.solution, self.infra, self.pipe)
+
     def cost(self) -> float:
         cost = Objectives().get_consumption(self.pipe, self.infra, self.solution)
         return cost
@@ -438,5 +457,13 @@ class Evaluate:
         return network_performance
 
     def constraint_privacy(self) -> bool:
-        c = Constraints(self.solution, self.infra, self.pipe)
-        return c.privacy_constraint()
+        return self.c.privacy_constraint()
+
+    def constraint_cpu(self) -> bool:
+        return self.c.cpu_constraint()
+
+    def constraint_deployment(self) -> bool:
+        return self.c.deployment_constraint()
+
+    def constraint_ram(self) -> bool:
+        return self.c.ram_constraint()

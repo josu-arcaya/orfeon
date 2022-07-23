@@ -22,11 +22,14 @@ LOGGER = logging.getLogger("optimizer")
 def evaluate_solution(file_solution: str):
     e = Evaluate(file_solution=file_solution)
     print(f"Constraints.Privacy = {e.constraint_privacy()}")
+    print(f"Constraints.CPU = {e.constraint_cpu()}")
+    print(f"Constraints.Deployment = {e.constraint_deployment()}")
+    print(f"Constraints.RAM = {e.constraint_ram()}")
 
-    print(f"Cost = {e.cost()}")
-    print(f"Model Performance = {e.model_performance()}")
-    print(f"Resilience = {e.resilience()}")
-    print(f"Network Performance = {e.network_performance()}")
+    print(f"Goals.Cost = {e.cost()}")
+    print(f"Goals.Model Performance = {e.model_performance()}")
+    print(f"Goals.Resilience = {e.resilience()}")
+    print(f"Goals.Network Performance = {e.network_performance()}")
 
 def generate_barchar(file_infrastructure, file_latencies):
     total_times = []

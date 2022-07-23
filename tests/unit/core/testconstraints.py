@@ -8,7 +8,7 @@ from jmetal.core.problem import BinaryProblem
 from jmetal.util.termination_criterion import StoppingByEvaluations
 
 from src.core.optimizer import TravelingModel, Optimizer, Constraints
-from src.core.utils import Infrastructure, Pipeline, WriteObjectivesToFileObserver
+from src.core.utils import Infrastructure, Pipeline, WriteObjectivesToFileObserver, Constraints
 
 
 class TestConstraints(unittest.TestCase):
@@ -40,6 +40,9 @@ class TestConstraints(unittest.TestCase):
             z = np.sum(s, axis=1) - 1
             self.assertFalse((z < 0).any())
 
+            c = Constraints(sol, self.infra, self.pipe)
+            self.assertEqual(c.deployment_constraint(), 0)
+
     # do not exceed total CPU per device
     def test_cpu(self):
         for sol in self.front:
@@ -50,6 +53,9 @@ class TestConstraints(unittest.TestCase):
             k = self.infra.thread_count.to_numpy()
             self.assertFalse((k < j).any())
 
+            c = Constraints(sol, self.infra, self.pipe)
+            self.assertEqual(c.cpu_constraint(), 0)
+
     # do not exceed total memory per device
     def test_memory(self):
         for sol in self.front:
@@ -58,6 +64,9 @@ class TestConstraints(unittest.TestCase):
             j = np.sum(i, axis=1)
             k = self.infra.memory.to_numpy()
             self.assertFalse((k < j).any())
+
+            c = Constraints(sol, self.infra, self.pipe)
+            self.assertEqual(c.ram_constraint(), 0)
 
     def test_privacy(self):
         # for sol in self.front:

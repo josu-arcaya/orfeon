@@ -71,13 +71,13 @@ class TravelingModel(BinaryProblem):
             self.infra, solution
         )
         solution.objectives[1] = -1 * self.objectives.get_performance(
-          self.pipe, self.infra, solution
+            self.pipe, self.infra, solution
         )
         solution.objectives[2] = self.objectives.get_consumption(
-          self.pipe, self.infra, solution
+            self.pipe, self.infra, solution
         )
         solution.objectives[3] = -1 * self.objectives.get_network_performance(
-           ld=self.ld, pipe=self.pipe, infra=self.infra, solution=solution
+            ld=self.ld, pipe=self.pipe, infra=self.infra, solution=solution
         )
 
         self.__evaluate_constraints(solution)
@@ -89,37 +89,32 @@ class TravelingModel(BinaryProblem):
 
         s = np.asfarray(solution.variables, dtype=np.bool)
 
+        c = Constraints(solution, self.infra, self.pipe)
         """ 
         do not exceed total CPU per device
         """
-        # for i in range(self.number_of_devices):
-        #    constraints.append( self.infra.thread_count[i] - (s[:,i] * self.pipe[0]).sum() )
-        # x = s.transpose()*self.pipe[0]
-        x = s.transpose() * self.pipe.cpus.to_numpy()
-        sum_rows = np.sum(x, axis=1)
-        thread_count = self.infra.thread_count.to_numpy()
-        constraints.append(0 if not (thread_count < sum_rows).any() else -1)
+        # x = s.transpose() * self.pipe.cpus.to_numpy()
+        # sum_rows = np.sum(x, axis=1)
+        # thread_count = self.infra.thread_count.to_numpy()
+        # constraints.append(0 if not (thread_count < sum_rows).any() else -1)
+        constraints.append(c.cpu_constraint())
 
         """
         do not exceed total RAM per device
         """
-        # for i in range(self.number_of_devices):
-        #    constraints.append( self.infra.memory[i] - (x[:,i] * self.pipe[1]).sum() )
-        # x = s.transpose()*self.pipe[1]
-        x = s.transpose() * self.pipe.memory.to_numpy()
-        sum_rows = np.sum(x, axis=1)
-        memory = self.infra.memory.to_numpy()
-        constraints.append(0 if not (memory < sum_rows).any() else -1)
+        # x = s.transpose() * self.pipe.memory.to_numpy()
+        # sum_rows = np.sum(x, axis=1)
+        # memory = self.infra.memory.to_numpy()
+        # constraints.append(0 if not (memory < sum_rows).any() else -1)
+        constraints.append(c.ram_constraint())
 
         """ 
         each model should be deployed in at least one device
         """
-        # for i in range(self.number_of_models):
-        #    constraints.append( s[i].sum() - 1 )
-        # sum all rows
-        sum_rows = np.sum(s, axis=1)
+        # sum_rows = np.sum(s, axis=1)
         # the sum of all rows should be bigger or equal to one
-        constraints.append(0 if not (sum_rows < 1).any() else -1)
+        # constraints.append(0 if not (sum_rows < 1).any() else -1)
+        constraints.append(c.deployment_constraint())
 
         """
         do not exceed total GPU per device
@@ -128,7 +123,6 @@ class TravelingModel(BinaryProblem):
         """ 
         enforce privacy constraints
         """
-        c = Constraints(solution, self.infra, self.pipe)
         constraints.append(c.privacy_constraint())
 
         solution.constraints = constraints
