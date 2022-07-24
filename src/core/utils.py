@@ -7,7 +7,9 @@ import pandas as pd
 import pycountry
 import pycountry_convert as pc
 import yaml
+
 from collections import namedtuple
+from math import ceil
 
 from jmetal.core.observer import Observer
 from jmetal.core.solution import BinarySolution
@@ -61,10 +63,10 @@ class Infrastructure:
         # normalize consumption
         my_max = self.infrastructure.consumption.apply(max).max()
         my_min = self.infrastructure.consumption.apply(min).min()
-
         self.infrastructure.consumption = (self.infrastructure.consumption - my_min) / (
             my_max - my_min
         )
+        # self.infrastructure.consumption /= ceil(self.infrastructure.consumption.apply(max).sum())
 
         self.infrastructure.parallelization = self.infrastructure.parallelization.apply(
             x
@@ -171,7 +173,7 @@ class Objectives:
         ]
 
         _, number_of_devices = s.shape
-        return sum(consumption) / number_of_devices
+        return sum(consumption) / number_of_devices * 4
 
     def get_performance(
         self, pipe: Pipeline, infra: Infrastructure, solution: BinarySolution
@@ -188,8 +190,13 @@ class Objectives:
         ]
 
         number_of_models, _ = s.shape
-        return (base_performance * coefficient).max(1).sum() / number_of_models
-        # return (base_performance*coefficient).mean(1).sum()
+        # return (base_performance * coefficient).max(1).sum() / number_of_models
+
+        x = base_performance * coefficient
+        x = np.ma.masked_array(x, mask=s == 0)
+        return np.nanmean(x, axis=1).sum() / number_of_models
+
+        # return (base_performance*coefficient).mean(1).sum() / number_of_models
 
     def get_resilience(self, infra: Infrastructure, solution: BinarySolution) -> int:
         s = np.asfarray(solution.variables, dtype=np.bool)
@@ -223,31 +230,14 @@ class Objectives:
         for index, value in pipe.link.iteritems():
             c[index] = s[value]
 
-        # c = np.array(s[pipe.link[0]])
-        # c = np.vstack([c, s[pipe.link[1]]])
-        # c = np.vstack([c, s[pipe.link[2]]])
-        # c = np.vstack([c, s[pipe.link[3]]])
-
         c = np.array([c])
 
-        # print(z.shape)
-        # print(c.shape)
-
         base_latency = z * c.transpose()
-        # print(base_latency.shape)
-        # print(np.sum(base_latency))
 
         base_bandwidth = s * infra.bandwidth.to_numpy()
-        # print(base_bandwidth.max(1).sum())
-
-        # base_bandwidth = s.dot(infra.bandwidth.to_numpy()).sum()
-        # print(base_bandwidth)
 
         number_of_models, _ = s.shape
         return (base_bandwidth.max(1).sum() - np.sum(base_latency)) / number_of_models
-        # return base_bandwidth.max(1).sum()
-
-        # return base_bandwidth + np.sum(z)
 
 
 class WriteObjectivesToFileObserver(Observer):
@@ -356,6 +346,7 @@ class StoppingByFullPareto(TerminationCriterion):
     def is_met(self):
         return self.offspring_size <= self.current_offspring_size
 
+
 class Constraints:
     def __init__(self, solution, infra, pipe):
         self.s = np.asfarray(solution.variables, dtype=np.bool)
@@ -409,6 +400,7 @@ class Constraints:
         memory = self.infra.memory.to_numpy()
         return 0 if not (memory < sum_rows).any() else -1
 
+
 class Evaluate:
     def __init__(self, file_solution: str):
         self.file_solution = file_solution
@@ -444,7 +436,9 @@ class Evaluate:
         return cost
 
     def model_performance(self) -> float:
-        model_performance = Objectives().get_performance(self.pipe, self.infra, self.solution)
+        model_performance = Objectives().get_performance(
+            self.pipe, self.infra, self.solution
+        )
         return model_performance
 
     def resilience(self) -> float:
@@ -454,7 +448,9 @@ class Evaluate:
     def network_performance(self) -> float:
         file_latencies = "src/resources/latencies.csv"
         ld = Latency(file_location=file_latencies).load()
-        network_performance = Objectives().get_network_performance(ld, self.pipe, self.infra, self.solution)
+        network_performance = Objectives().get_network_performance(
+            ld, self.pipe, self.infra, self.solution
+        )
         return network_performance
 
     def constraint_privacy(self) -> bool:
