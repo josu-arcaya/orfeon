@@ -77,7 +77,7 @@ def generate_pareto(file_infrastructure, file_latencies):
         file_latencies=file_latencies,
         input_pipeline=input_pipeline,
         # termination_criterion=StoppingByFullPareto(offspring_size=population_size),
-        termination_criterion=StoppingByTime(max_seconds=600),
+        termination_criterion=StoppingByTime(max_seconds=180),
         population_size=population_size,
     )
     o.run()

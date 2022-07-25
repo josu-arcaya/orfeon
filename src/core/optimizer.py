@@ -18,6 +18,7 @@ from src.core.utils import (
     StoppingByFullPareto,
     Constraints,
 )
+from src.core.mutation import PowerOffMutation
 
 from jmetal.algorithm.multiobjective.nsgaii import NSGAII
 from jmetal.algorithm.multiobjective.nsgaiii import (
@@ -185,7 +186,8 @@ class Optimizer:
             # offspring_population_size=self.population_size,
             # reference_directions=UniformReferenceDirectionFactory(4, n_points=92),
             reference_directions=UniformReferenceDirectionFactory(4, n_points=92),
-            mutation=BitFlipMutation(probability=1.0 / self.problem.number_of_devices),
+            # mutation=BitFlipMutation(probability=1.0 / self.problem.number_of_devices),
+            mutation=PowerOffMutation(probability=1.0 / self.problem.number_of_devices),
             crossover=SPXCrossover(probability=1.0),
             termination_criterion=self.termination_criterion,
             # termination_criterion=StoppingByEvaluations(max_evaluations=self.max_evaluations),
