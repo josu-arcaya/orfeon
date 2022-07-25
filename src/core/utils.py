@@ -233,11 +233,21 @@ class Objectives:
         c = np.array([c])
 
         base_latency = z * c.transpose()
-
         base_bandwidth = s * infra.bandwidth.to_numpy()
 
         number_of_models, _ = s.shape
-        return (base_bandwidth.max(1).sum() - np.sum(base_latency)) / number_of_models
+        network_performance = (
+            base_bandwidth.max(1).sum() - np.sum(base_latency)
+        ) / number_of_models
+
+        x = np.ma.masked_array(base_bandwidth, mask=s == 0)
+        x = np.ma.masked_array(x, mask=s == 0)
+
+        network_performance = (
+            np.nanmean(x, axis=1).sum() - np.sum(base_latency)
+        ) / number_of_models
+
+        return network_performance
 
 
 class WriteObjectivesToFileObserver(Observer):
@@ -254,13 +264,13 @@ class WriteObjectivesToFileObserver(Observer):
         s = np.array([s.objectives for s in kwargs["SOLUTIONS"]])
 
         # means = s.mean(0)
-        objective0 = s[np.argsort(s[:, 0])][:3].mean(0)[0]
+        objective0 = s[np.argsort(s[:, 0])][:5].mean(0)[0]
         # objective0 = s[np.argsort(s[:,0])][0][0]
-        objective1 = s[np.argsort(s[:, 1])][:3].mean(0)[1]
+        objective1 = s[np.argsort(s[:, 1])][:5].mean(0)[1]
         # objective1 = s[np.argsort(s[:,1])][0][1]
-        objective2 = s[np.argsort(s[:, 2])][:3].mean(0)[2]
+        objective2 = s[np.argsort(s[:, 2])][:5].mean(0)[2]
         # objective2 = s[np.argsort(s[:,2])][0][2]
-        objective3 = s[np.argsort(s[:, 3])][:3].mean(0)[3]
+        objective3 = s[np.argsort(s[:, 3])][:5].mean(0)[3]
 
         with open(self.filename, "a") as out_file:
             # out_file.write(f"{abs(means[0])},{abs(means[1])},{abs(means[2])}\n")

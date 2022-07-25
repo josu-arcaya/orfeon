@@ -77,7 +77,7 @@ def generate_pareto(file_infrastructure, file_latencies):
         file_latencies=file_latencies,
         input_pipeline=input_pipeline,
         # termination_criterion=StoppingByFullPareto(offspring_size=population_size),
-        termination_criterion=StoppingByTime(max_seconds=180),
+        termination_criterion=StoppingByTime(max_seconds=600),
         population_size=population_size,
     )
     o.run()
@@ -87,7 +87,7 @@ def generate_pareto(file_infrastructure, file_latencies):
 
 def generate_fitnesses(file_infrastructure, file_latencies):
     file_pipeline = f"src/resources/pipeline_20.yml"
-    population_size = 160
+    population_size = 180
     with open(file_pipeline, "r") as input_data_file:
         input_pipeline = input_data_file.read()
     Optimizer(
