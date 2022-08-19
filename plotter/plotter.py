@@ -70,11 +70,14 @@ def fitness(objective: int):
     # from matplotlib import rcParams
     # import matplotlib.font_manager as fm
     # fm._rebuild()
+    #hfont = {"fontname": "Courier"}
     plt.rcParams["svg.fonttype"] = "none"
-    # rcParams['font.family'] = 'sans-serif'
+    # plt.rcParams['font.family'] = 'serif'
+    # plt.rcParams["font.fontname"] = "Courier"
     # rcParams['font.sans-serif'] = ['Tahoma']
     plt.plot(data[:, objective], color=color[objective])
     plt.ylabel(ylabel=ylabel[objective])
+    #plt.xlabel("Number of generations", **hfont)
     plt.xlabel("Number of generations")
 
     # red_patch = mpatches.Patch(color='red', label='The red data')

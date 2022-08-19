@@ -218,7 +218,6 @@ class Objectives:
         solution: BinarySolution,
     ) -> int:
 
-        # bandwidth
         # throughput
         # latency
 
@@ -236,9 +235,9 @@ class Objectives:
         base_bandwidth = s * infra.bandwidth.to_numpy()
 
         number_of_models, _ = s.shape
-        network_performance = (
-            base_bandwidth.max(1).sum() - np.sum(base_latency)
-        ) / number_of_models
+        # network_performance = (
+        #    base_bandwidth.max(1).sum() - np.sum(base_latency)
+        # ) / number_of_models
 
         x = np.ma.masked_array(base_bandwidth, mask=s == 0)
         x = np.ma.masked_array(x, mask=s == 0)

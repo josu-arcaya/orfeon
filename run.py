@@ -5,6 +5,7 @@ import argparse
 import csv
 import logging
 import os
+import pandas as pd
 import time
 from src.core.optimizer import Optimizer
 from src.core.utils import (
@@ -19,19 +20,54 @@ from jmetal.util.termination_criterion import StoppingByEvaluations, StoppingByT
 
 LOGGER = logging.getLogger("optimizer")
 
+
+def compete(file_infrastructure: str, file_latencies: str):
+    file_pipeline = f"src/resources/pipeline_40.yml"
+    population_size = 180
+    with open(file_pipeline, "r") as input_data_file:
+        input_pipeline = input_data_file.read()
+    o = Optimizer(
+        file_infrastructure=file_infrastructure,
+        file_latencies=file_latencies,
+        input_pipeline=input_pipeline,
+        termination_criterion=StoppingByTime(max_seconds=5400),
+        population_size=population_size,
+    )
+    o.run()
+
+    objectives = []
+    for s in o.get_front():
+        objectives.append(s.objectives)
+
+    df = pd.DataFrame(
+        objectives,
+        columns=["Resilience", "Model Performance", "Cost", "Network performance"],
+    )
+    print(f"Goals.Resilience = {df.sort_values(by=['Resilience']).head(1)}")
+    print(
+        f"Goals.Model Performance = {df.sort_values(by=['Model Performance']).head(1)}"
+    )
+    print(f"Goals.Cost = {df.sort_values(by=['Cost']).head(1)}")
+    print(
+        f"Goals.Network Performance = {df.sort_values(by=['Network performance']).head(1)}"
+    )
+
+
 def evaluate_solution(file_solution: str):
     e = Evaluate(file_solution=file_solution)
-    print(f"Constraints.Privacy = {e.constraint_privacy()}")
     print(f"Constraints.CPU = {e.constraint_cpu()}")
-    print(f"Constraints.Deployment = {e.constraint_deployment()}")
     print(f"Constraints.RAM = {e.constraint_ram()}")
+    print(f"Constraints.GPU = 0")
+    print(f"Constraints.Deployment = {e.constraint_deployment()}")
+    print(f"Constraints.Privacy = {e.constraint_privacy()}")
 
-    print(f"Goals.Cost = {e.cost()}")
-    print(f"Goals.Model Performance = {e.model_performance()}")
     print(f"Goals.Resilience = {e.resilience()}")
+    print(f"Goals.Model Performance = {e.model_performance()}")
+    print(f"Goals.Cost = {e.cost()}")
     print(f"Goals.Network Performance = {e.network_performance()}")
 
-def generate_barchar(file_infrastructure, file_latencies):
+
+def generate_times(file_infrastructure, file_latencies):
     total_times = []
     pipelines = [
         "pipeline_5.yml",
@@ -157,6 +193,13 @@ def main():
         help="Indicate a csv solution",
         required=False,
     )
+    required.add_argument(
+        "-c",
+        "--compete",
+        action="store_true",
+        help="Get best solutions for each goal",
+        required=False,
+    )
 
     args = parser.parse_args()
 
@@ -168,7 +211,7 @@ def main():
     file_latencies = "src/resources/latencies.csv"
 
     if args.times:
-        generate_barchar(
+        generate_times(
             file_infrastructure=file_infrastructure, file_latencies=file_latencies
         )
 
@@ -191,6 +234,9 @@ def main():
 
     if args.evaluate:
         evaluate_solution(file_solution=args.evaluate)
+
+    if args.compete:
+        compete(file_infrastructure=file_infrastructure, file_latencies=file_latencies)
 
 
 if __name__ == "__main__":
