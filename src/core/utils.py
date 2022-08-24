@@ -7,6 +7,7 @@ import pandas as pd
 import pycountry
 import pycountry_convert as pc
 import yaml
+import datetime
 
 from collections import namedtuple
 from math import ceil
@@ -344,18 +345,21 @@ class StoppingByTotalDominance(TerminationCriterion):
 
 
 class StoppingByConstraintsMet(TerminationCriterion):
-    def __init__(self, idle_evaluations: int):
+    def __init__(self):
         super(StoppingByConstraintsMet, self).__init__()
+        self.constraints_met = False
 
     def update(self, *args, **kwargs):
-        self.seconds = kwargs["COMPUTING_TIME"]
+        seconds = kwargs["COMPUTING_TIME"]
 
-        s = np.array([s.constraints for s in kwargs["SOLUTIONS"]])
-        print(np.sum(s))
+        c = np.array([s.constraints for s in kwargs["SOLUTIONS"]])
+        if np.sum(c) == 0:
+            self.constraints_met = True
+        LOGGER.info(f"{str(datetime.timedelta(seconds=seconds))} - {np.sum(c)}")
 
     @property
     def is_met(self):
-        return self.seconds >= 30
+        return self.constraints_met
 
 
 class StoppingByFullPareto(TerminationCriterion):

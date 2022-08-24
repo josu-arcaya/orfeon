@@ -11,6 +11,7 @@ from src.core.optimizer import Optimizer
 from src.core.utils import (
     StoppingByNonDominance,
     StoppingByTotalDominance,
+    StoppingByConstraintsMet,
     StoppingByFullPareto,
     WriteObjectivesToFileObserver,
     ParetoTools,
@@ -22,8 +23,8 @@ from tabulate import tabulate
 LOGGER = logging.getLogger("optimizer")
 
 
-def compete(file_infrastructure: str, file_latencies: str):
-    file_pipeline = f"src/resources/pipeline_10.yml"
+def compete(file_infrastructure: str, file_latencies: str, pipeline: str):
+    file_pipeline = f"src/resources/pipeline_{pipeline}.yml"
     population_size = 180
     with open(file_pipeline, "r") as input_data_file:
         input_pipeline = input_data_file.read()
@@ -31,7 +32,8 @@ def compete(file_infrastructure: str, file_latencies: str):
         file_infrastructure=file_infrastructure,
         file_latencies=file_latencies,
         input_pipeline=input_pipeline,
-        termination_criterion=StoppingByTime(max_seconds=7200),
+        # termination_criterion=StoppingByTime(max_seconds=7200),
+        termination_criterion=StoppingByConstraintsMet(),
         population_size=population_size,
     )
     o.run()
@@ -212,7 +214,8 @@ def main():
     required.add_argument(
         "-c",
         "--compete",
-        action="store_true",
+        type=str,
+        default=None,
         help="Get best solutions for each goal",
         required=False,
     )
@@ -252,7 +255,11 @@ def main():
         evaluate_solution(file_solution=args.evaluate)
 
     if args.compete:
-        compete(file_infrastructure=file_infrastructure, file_latencies=file_latencies)
+        compete(
+            file_infrastructure=file_infrastructure,
+            file_latencies=file_latencies,
+            pipeline=args.compete,
+        )
 
 
 if __name__ == "__main__":
