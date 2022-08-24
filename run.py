@@ -17,12 +17,13 @@ from src.core.utils import (
     Evaluate,
 )
 from jmetal.util.termination_criterion import StoppingByEvaluations, StoppingByTime
+from tabulate import tabulate
 
 LOGGER = logging.getLogger("optimizer")
 
 
 def compete(file_infrastructure: str, file_latencies: str):
-    file_pipeline = f"src/resources/pipeline_40.yml"
+    file_pipeline = f"src/resources/pipeline_10.yml"
     population_size = 180
     with open(file_pipeline, "r") as input_data_file:
         input_pipeline = input_data_file.read()
@@ -30,26 +31,39 @@ def compete(file_infrastructure: str, file_latencies: str):
         file_infrastructure=file_infrastructure,
         file_latencies=file_latencies,
         input_pipeline=input_pipeline,
-        termination_criterion=StoppingByTime(max_seconds=5400),
+        termination_criterion=StoppingByTime(max_seconds=7200),
         population_size=population_size,
     )
     o.run()
 
     objectives = []
     for s in o.get_front():
-        objectives.append(s.objectives)
+        objectives.append(s.objectives + s.constraints)
 
     df = pd.DataFrame(
         objectives,
-        columns=["Resilience", "Model Performance", "Cost", "Network performance"],
+        columns=[
+            "Resilience",
+            "Model Perf",
+            "Cost",
+            "Network Perf",
+            "cpu",
+            "ram",
+            "deploy",
+            "privacy",
+        ],
     )
-    print(f"Goals.Resilience = {df.sort_values(by=['Resilience']).head(1)}")
     print(
-        f"Goals.Model Performance = {df.sort_values(by=['Model Performance']).head(1)}"
+        f"Goals.Resilience = {tabulate(df.sort_values(by=['Resilience']).head(1), headers='keys', tablefmt='psql')}"
     )
-    print(f"Goals.Cost = {df.sort_values(by=['Cost']).head(1)}")
     print(
-        f"Goals.Network Performance = {df.sort_values(by=['Network performance']).head(1)}"
+        f"Goals.Model Performance = {tabulate(df.sort_values(by=['Model Perf']).head(1), headers='keys', tablefmt='psql')}"
+    )
+    print(
+        f"Goals.Cost = {tabulate(df.sort_values(by=['Cost']).head(1), headers='keys', tablefmt='psql')}"
+    )
+    print(
+        f"Goals.Network Performance = {tabulate(df.sort_values(by=['Network Perf']).head(1), headers='keys', tablefmt='psql')}"
     )
 
 
@@ -80,16 +94,18 @@ def generate_times(file_infrastructure, file_latencies):
         file_pipeline = f"src/resources/{p}"
         with open(file_pipeline, "r") as input_data_file:
             input_pipeline = input_data_file.read()
+        population_size = 60
         pipe_time = []
         # do it 100 times
-        for i in range(2):
+        for i in range(100):
             start_time = time.time()
             LOGGER.info(f"Executing iteration {i} of {file_pipeline}.")
             Optimizer(
                 file_infrastructure=file_infrastructure,
                 file_latencies=file_latencies,
                 input_pipeline=input_pipeline,
-                termination_criterion=StoppingByTotalDominance(idle_evaluations=40),
+                termination_criterion=StoppingByTotalDominance(idle_evaluations=20),
+                population_size=population_size,
             ).run()
             end_time = time.time()
             pipe_time.append(end_time - start_time)

@@ -67,12 +67,12 @@ def main():
             memory = random.randint(1, 16)
         elif model_size == 1:
             # medium model
-            cpus = random.randint(7, 32)
+            cpus = random.randint(7, 28)
             memory = random.randint(16, 64)
         elif model_size == 2:
             # large model
-            cpus = random.randint(32, 128)
-            memory = random.randint(64, 256)
+            cpus = random.randint(28, 32)
+            memory = random.randint(64, 251)
         m = Model(
             model_name=f"m{i}",
             cpus=cpus,

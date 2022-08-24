@@ -4,3 +4,4 @@ PyYAML==5.1.2
 pycountry_convert==0.7.2
 pycountry==20.7.3
 sklearn==0.0
+tabulate==0.8.10

@@ -86,9 +86,8 @@ class TravelingModel(BinaryProblem):
         return solution
 
     def __evaluate_constraints(self, solution: BinarySolution) -> None:
-        constraints = [0.0 for _ in range(self.number_of_constraints)]
-
-        s = np.asfarray(solution.variables, dtype=np.bool)
+        #constraints = [0.0 for _ in range(self.number_of_constraints)]
+        constraints = []
 
         c = Constraints(solution, self.infra, self.pipe)
         """ 

@@ -339,7 +339,23 @@ class StoppingByTotalDominance(TerminationCriterion):
 
     @property
     def is_met(self):
-        return self.evaluations >= (self.idle_evaluations - (self.seconds / 10) ** 2)
+        return self.evaluations >= (self.idle_evaluations - (self.seconds / 14) ** 2)
+        # return self.evaluations >= (self.idle_evaluations)
+
+
+class StoppingByConstraintsMet(TerminationCriterion):
+    def __init__(self, idle_evaluations: int):
+        super(StoppingByConstraintsMet, self).__init__()
+
+    def update(self, *args, **kwargs):
+        self.seconds = kwargs["COMPUTING_TIME"]
+
+        s = np.array([s.constraints for s in kwargs["SOLUTIONS"]])
+        print(np.sum(s))
+
+    @property
+    def is_met(self):
+        return self.seconds >= 30
 
 
 class StoppingByFullPareto(TerminationCriterion):
