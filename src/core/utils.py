@@ -174,7 +174,7 @@ class Objectives:
         ]
 
         _, number_of_devices = s.shape
-        return sum(consumption) / number_of_devices * 4
+        return sum(consumption) / number_of_devices
 
     def get_performance(
         self, pipe: Pipeline, infra: Infrastructure, solution: BinarySolution
@@ -353,9 +353,35 @@ class StoppingByConstraintsMet(TerminationCriterion):
         seconds = kwargs["COMPUTING_TIME"]
 
         c = np.array([s.constraints for s in kwargs["SOLUTIONS"]])
-        if np.sum(c) == 0:
+        df = pd.DataFrame(
+            c,
+            columns=[
+                "cpu",
+                "ram",
+                "deploy",
+                "privacy",
+            ],
+        )
+        size = sum(
+            (
+                (df["cpu"] == 0)
+                & (df["ram"] == 0)
+                & (df["deploy"] == 0)
+                & (df["privacy"] == 0)
+            )
+        )
+        if size > 0:
             self.constraints_met = True
-        LOGGER.info(f"{str(datetime.timedelta(seconds=seconds))} - {np.sum(c)}")
+
+        size_cpu = sum(df["cpu"] == 0)
+        size_ram = sum(df["ram"] == 0)
+        size_deploy = sum(df["deploy"] == 0)
+        size_privacy = sum(df["privacy"] == 0)
+        size_total = len(df)
+
+        LOGGER.info(
+            f"{str(datetime.timedelta(seconds=seconds))} - total = {size_total}, cpu = {size_cpu}, ram = {size_ram}, deploy = {size_deploy}, privacy = {size_privacy}"
+        )
 
     @property
     def is_met(self):
@@ -403,31 +429,37 @@ class Constraints:
         model_matrix = sol_loc_mod * privacy_mask
 
         # returns true if both matrixes are equal
-        return (device_matrix == model_matrix).all()
+        check_matrix = device_matrix == model_matrix
+        false_count = np.size(check_matrix) - np.sum(check_matrix)
+        # return (device_matrix == model_matrix).all()
+        return false_count
 
     def privacy_constraint(self):
-        if not self.__privacy("country", 2):
-            return -1
-        if not self.__privacy("continent", 1):
-            return -1
-        return 0
+        privacy_count = self.__privacy("country", 2) + self.__privacy("continent", 1)
+        # return 0
+        return -1 * privacy_count
 
     def cpu_constraint(self):
         x = self.s.transpose() * self.pipe.cpus.to_numpy()
         sum_rows = np.sum(x, axis=1)
         thread_count = self.infra.thread_count.to_numpy()
-        return 0 if not (thread_count < sum_rows).any() else -1
+        # return 0 if not (thread_count < sum_rows).any() else -1
+        c = [i if i > 0 else 0 for i in sum_rows / thread_count]
+        return 0 if not (thread_count < sum_rows).any() else -1 * np.sum(c)
 
     def deployment_constraint(self):
         sum_rows = np.sum(self.s, axis=1)
         # the sum of all rows should be bigger or equal to one
-        return 0 if not (sum_rows < 1).any() else -1
+        return 0 if not (sum_rows < 1).any() else -1 * np.sum(sum_rows < 1)
 
     def ram_constraint(self):
         x = self.s.transpose() * self.pipe.memory.to_numpy()
         sum_rows = np.sum(x, axis=1)
         memory = self.infra.memory.to_numpy()
-        return 0 if not (memory < sum_rows).any() else -1
+        # return 0 if not (memory < sum_rows).any() else -1
+        c = [i if i > 0 else 0 for i in sum_rows / memory]
+
+        return 0 if not (memory < sum_rows).any() else -1 * np.sum(c)
 
 
 class Evaluate:

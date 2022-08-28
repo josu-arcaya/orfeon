@@ -25,15 +25,16 @@ LOGGER = logging.getLogger("optimizer")
 
 def compete(file_infrastructure: str, file_latencies: str, pipeline: str):
     file_pipeline = f"src/resources/pipeline_{pipeline}.yml"
-    population_size = 180
+    # population_size = 180
+    population_size = 80
     with open(file_pipeline, "r") as input_data_file:
         input_pipeline = input_data_file.read()
     o = Optimizer(
         file_infrastructure=file_infrastructure,
         file_latencies=file_latencies,
         input_pipeline=input_pipeline,
-        # termination_criterion=StoppingByTime(max_seconds=7200),
-        termination_criterion=StoppingByConstraintsMet(),
+        termination_criterion=StoppingByTime(max_seconds=5400),
+        # termination_criterion=StoppingByConstraintsMet(),
         population_size=population_size,
     )
     o.run()
@@ -149,7 +150,6 @@ def generate_fitnesses(file_infrastructure, file_latencies):
         file_latencies=file_latencies,
         input_pipeline=input_pipeline,
         # termination_criterion=StoppingByTotalDominance(idle_evaluations=100),
-        # termination_criterion=StoppingByEvaluations(max_evaluations=40 * 2000),
         termination_criterion=StoppingByEvaluations(
             max_evaluations=population_size * 2000
         ),

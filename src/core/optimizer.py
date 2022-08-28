@@ -86,7 +86,7 @@ class TravelingModel(BinaryProblem):
         return solution
 
     def __evaluate_constraints(self, solution: BinarySolution) -> None:
-        #constraints = [0.0 for _ in range(self.number_of_constraints)]
+        # constraints = [0.0 for _ in range(self.number_of_constraints)]
         constraints = []
 
         c = Constraints(solution, self.infra, self.pipe)
@@ -143,11 +143,14 @@ class TravelingModel(BinaryProblem):
         new_solution.variables = list(map(list, zip(*sol)))
         """
         for i in range(self.number_of_models):
+            # new_solution.variables[i] = [
+            #    True if random.random() > 0.5 else False
+            #    for _ in range(self.number_of_devices)
+            # ]
             new_solution.variables[i] = [
-                True if random.random() > 0.5 else False
+                True if random.random() < (2 / self.number_of_devices) else False
                 for _ in range(self.number_of_devices)
             ]
-            # [True if random.randint(0, 1) == 0 else False for _ in range(self.number_of_devices)]
 
         return new_solution
 

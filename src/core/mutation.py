@@ -34,6 +34,13 @@ class PowerOffMutation(Mutation[BinarySolution]):
                         solution.variables[i][j] = (
                             True if solution.variables[i][j] is False else False
                         )
+        
+        for i in range(number_of_models):
+            if sum(solution.variables[i]) == 0:
+                for j in range(number_of_devices):
+                    rand = random.random()
+                    if rand <= self.probability:
+                        solution.variables[i][j] = True
 
         return solution
 
