@@ -444,8 +444,8 @@ class Constraints:
         sum_rows = np.sum(x, axis=1)
         thread_count = self.infra.thread_count.to_numpy()
         # return 0 if not (thread_count < sum_rows).any() else -1
-        c = [i if i > 0 else 0 for i in sum_rows / thread_count]
-        return 0 if not (thread_count < sum_rows).any() else -1 * np.sum(c)
+        c = [i if i > 1 else 0 for i in sum_rows / thread_count]
+        return 0 if not (thread_count <= sum_rows).any() else -1 * np.sum(c)
 
     def deployment_constraint(self):
         sum_rows = np.sum(self.s, axis=1)

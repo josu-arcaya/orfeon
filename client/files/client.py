@@ -7,11 +7,13 @@ import os
 import psycopg2
 import re
 import socket
+import speedtest
 import subprocess
 import uuid
 from datetime import datetime
 from ipwhois import IPWhois
 from requests import get
+from tcp_latency import measure_latency
 
 """
     According to Eurostat
@@ -111,7 +113,20 @@ def get_location():
     country_code = obj.lookup_rdap(depth=1)['asn_country_code']
     return country_code
 
-def insert_data(thread_count, frequency, memory, resillience, performance, parallelization, consumption, country_code, cloud_type, instance_type, ts, stage):
+def get_latency():
+    latency = measure_latency(host='8.8.8.8')[0]
+    return latency
+
+def get_throughput():
+    s = speedtest.Speedtest()
+    s.download(threads=None)
+    s.upload(threads=None)
+    s.results.share()
+
+    results_dict = s.results.dict()
+    return results_dict
+
+def insert_data(thread_count, frequency, memory, resillience, performance, parallelization, consumption, country_code, cloud_type, instance_type, ts, stage, latency, throughput):
     try:
         host = os.getenv('DB_HOST')
         password = os.getenv('DB_PASS')
@@ -122,10 +137,10 @@ def insert_data(thread_count, frequency, memory, resillience, performance, paral
             database="optimizer")
 
         cursor = connection.cursor()
-        sql = """ INSERT INTO servers (hostname, thread_count, frequency, memory, resillience, performance, parallelization, consumption, country_code, cloud_type, instance_type, ts, stage) 
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) """
+        sql = """ INSERT INTO servers (hostname, thread_count, frequency, memory, resillience, performance, parallelization, consumption, country_code, cloud_type, instance_type, ts, stage, latency, throughput) 
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) """
         cursor.execute(sql,
-            (str(uuid.uuid4()), thread_count, frequency, memory, resillience, performance, parallelization, consumption, country_code, cloud_type, instance_type, ts, stage))
+            (str(uuid.uuid4()), thread_count, frequency, memory, resillience, performance, parallelization, consumption, country_code, cloud_type, instance_type, ts, stage, latency, throughput))
 
         connection.commit()
         logging.info("Record inserted successfully")
@@ -220,11 +235,15 @@ def main():
         logging.info(f"Country code = {country_code}")
         frequency = processor_frequency()
         logging.info(f"CPU MHz = {frequency}")
+        latency = get_latency()
+        throughput = get_throughput()
         insert_data(thread_count, frequency, memory, resillience,
             performance, parallelization,
             consumption, country_code,
             os.getenv('CLOUD_TYPE'), os.getenv('INSTANCE_TYPE'),
-            datetime.now(), os.getenv('STAGE'))
+            datetime.now(), os.getenv('STAGE'),
+            latency,
+            throughput)
 
 if __name__ == '__main__':
     main()

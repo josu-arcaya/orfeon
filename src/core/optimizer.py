@@ -143,14 +143,14 @@ class TravelingModel(BinaryProblem):
         new_solution.variables = list(map(list, zip(*sol)))
         """
         for i in range(self.number_of_models):
-            # new_solution.variables[i] = [
-            #    True if random.random() > 0.5 else False
-            #    for _ in range(self.number_of_devices)
-            # ]
             new_solution.variables[i] = [
-                True if random.random() < (2 / self.number_of_devices) else False
-                for _ in range(self.number_of_devices)
+               True if random.random() > 0.5 else False
+               for _ in range(self.number_of_devices)
             ]
+            #new_solution.variables[i] = [
+            #    True if random.random() < (2 / self.number_of_devices) else False
+            #    for _ in range(self.number_of_devices)
+            #]
 
         return new_solution
 
